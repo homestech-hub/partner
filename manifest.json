@@ -1,0 +1,21 @@
+{
+  "name": "Homestech Partner",
+  "short_name": "HT Partner",
+  "description": "Hệ thống quản lý Cộng tác viên Homestech",
+  "start_url": "ctv.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#059669",
+  "icons": [
+    {
+      "src": "https://homestechjsc.vn/wp-content/uploads/2026/05/partner.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://homestechjsc.vn/wp-content/uploads/2026/05/partner.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
