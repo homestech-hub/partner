@@ -1,227 +1,474 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Homestech Admin | CRM Dashboard</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --primary: #059669; --bg: #f8fafc; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #1e293b; }
-        
-        /* Tab Styling */
-        .nav-pills .nav-link { color: #64748b; font-weight: 700; border-radius: 12px; padding: 10px 20px; transition: 0.3s; border: 1px solid transparent; }
-        .nav-pills .nav-link.active { background-color: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); border-color: var(--primary); }
-        .nav-pills .nav-link:hover:not(.active) { background-color: #e2e8f0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-        .stat-card { background: #fff; border-radius: 20px; border: 1px solid #f1f5f9; padding: 20px; transition: all 0.3s; }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .table-container { background: #fff; border-radius: 24px; border: 1px solid #f1f5f9; overflow: hidden; }
-        
-        .filter-box { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 10px 15px; }
-        .filter-input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.9rem; font-weight: 600; }
-        
-        .step-pill { font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
-        .step-1 { background: #f1f5f9; color: #64748b; }
-        .step-2 { background: #fef9c3; color: #a16207; }
-        .step-3 { background: #dcfce7; color: #166534; }
-        .step-4 { background: #dbeafe; color: #1e40af; }
-        .step-5 { background: #059669; color: #fff; }
+<title>Homestech Admin | CRM Dashboard</title>
 
-        .ctv-tag { background: #ecfdf5; color: #059669; padding: 2px 10px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; }
-    </style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--primary:#059669;
+--bg:#f1f5f9;
+}
+
+body{
+font-family:'Plus Jakarta Sans',sans-serif;
+background:var(--bg);
+color:#1e293b;
+}
+
+.app-wrapper{display:flex;min-height:100vh;}
+
+.sidebar{
+width:240px;background:#fff;border-right:1px solid #e5e7eb;
+padding:20px;position:sticky;top:0;height:100vh;
+}
+
+.sidebar .logo{font-weight:800;font-size:18px;margin-bottom:30px;}
+
+.sidebar .nav-link{
+border-radius:12px;font-weight:700;color:#64748b;margin-bottom:6px;
+}
+
+.sidebar .nav-link.active{background:var(--primary);color:#fff;}
+
+.main-content{flex:1;display:flex;flex-direction:column;}
+
+.topbar{
+background:#fff;border-bottom:1px solid #e5e7eb;
+padding:12px 25px;display:flex;justify-content:space-between;align-items:center;
+}
+
+.stat-card{
+background:#fff;border-radius:20px;border:1px solid #eef2f7;
+padding:20px;
+}
+
+.table-container{
+background:#fff;border-radius:24px;border:1px solid #eef2f7;overflow:hidden;
+}
+
+.filter-box{
+background:#fff;border-radius:14px;border:1px solid #eef2f7;padding:10px 15px;
+}
+
+.filter-input{border:none;outline:none;background:transparent;width:100%;font-weight:600;}
+
+.step-pill{font-size:.7rem;padding:4px 12px;border-radius:20px;font-weight:700;}
+.step-1{background:#f1f5f9;color:#64748b;}
+.step-2{background:#fef9c3;color:#a16207;}
+.step-3{background:#dcfce7;color:#166534;}
+.step-4{background:#dbeafe;color:#1e40af;}
+.step-5{background:#059669;color:#fff;}
+
+.ctv-tag{
+background:#ecfdf5;color:#059669;padding:2px 10px;border-radius:10px;
+font-weight:700;font-size:.75rem;
+}
+
+@media(max-width:992px){
+.sidebar{display:none;}
+}
+</style>
 </head>
+
 <body>
 
-    <nav class="navbar bg-white border-bottom sticky-top py-2">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2">
-                <div class="bg-primary p-2 rounded-3 text-white"><i class="bi bi-grid-1x2-fill"></i></div>
-                <span class="fw-800 fs-5 d-none d-md-inline">HOMESTECH <span class="text-primary">CRM</span></span>
-            </div>
-            
-            <ul class="nav nav-pills small" id="adminTabs">
-                <li class="nav-item"><a class="nav-link active" data-tab="tab-dashboard" href="#"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" data-tab="tab-ctv" href="#"><i class="bi bi-people me-1"></i> CTV</a></li>
-                <li class="nav-item"><a class="nav-link" data-tab="tab-reports" href="#"><i class="bi bi-bar-chart me-1"></i> Báo cáo</a></li>
-                <li class="nav-item"><a class="nav-link" data-tab="tab-accounts" href="#"><i class="bi bi-shield-lock me-1"></i> Tài khoản</a></li>
-            </ul>
+<div class="app-wrapper">
 
-            <button class="btn btn-light rounded-pill px-3 fw-700 small" onclick="logout()">Thoát</button>
-        </div>
-    </nav>
+<!-- SIDEBAR -->
+<div class="sidebar">
+<div class="logo">HOMESTECH <span class="text-success">CRM</span></div>
 
-    <div class="container py-4">
-        
-        <div id="tab-dashboard" class="tab-content">
-            <div class="row g-3 mb-4">
-                <div class="col-md-3"><div class="stat-card text-center"><small class="text-muted fw-600">Tổng khách hàng</small><h3 id="statTotalLeads" class="fw-800 mb-0">0</h3></div></div>
-                <div class="col-md-3"><div class="stat-card text-center"><small class="text-muted fw-600">Đang xử lý</small><h3 id="statPendingLeads" class="fw-800 mb-0 text-warning">0</h3></div></div>
-                <div class="col-md-3"><div class="stat-card text-center"><small class="text-muted fw-600">Đã chốt đơn</small><h3 id="statDoneLeads" class="fw-800 mb-0 text-success">0</h3></div></div>
-                <div class="col-md-3"><div class="stat-card text-center bg-primary text-white"><small class="opacity-75 fw-600">Tổng hoa hồng (đ)</small><h3 id="statTotalMoney" class="fw-800 mb-0">0</h3></div></div>
-            </div>
+<ul class="nav flex-column nav-pills" id="adminTabs">
+<li class="nav-item"><a class="nav-link active" data-tab="tab-dashboard" href="#">Dashboard</a></li>
+<li class="nav-item"><a class="nav-link" data-tab="tab-reports" href="#">Báo cáo</a></li>
+<li class="nav-item"><a class="nav-link" data-tab="tab-calculator" href="#">Tính hoa hồng</a></li>
+<li class="nav-item"><a class="nav-link" data-tab="tab-payout" href="#">Lịch sử thanh toán</a></li>
+<li class="nav-item"><a class="nav-link" data-tab="tab-ctv" href="#">CTV</a></li>
+<li class="nav-item"><a class="nav-link" data-tab="tab-accounts" href="#">Tài khoản</a></li>
+</ul>
+</div>
 
-            <div class="row g-3 mb-4">
-                <div class="col-md-4"><div class="filter-box d-flex align-items-center"><i class="bi bi-search text-muted me-2"></i><input type="text" id="searchName" class="filter-input" placeholder="Tìm tên khách hoặc SĐT..."></div></div>
-                <div class="col-md-4"><div class="filter-box d-flex align-items-center"><i class="bi bi-person-badge text-muted me-2"></i><select id="filterCTV" class="filter-input border-0"><option value="">Tất cả CTV</option></select></div></div>
-                <div class="col-md-4"><div class="filter-box d-flex align-items-center"><i class="bi bi-calendar-event text-muted me-2"></i><select id="filterTime" class="filter-input border-0"><option value="">Tất cả thời gian</option></select></div></div>
-            </div>
+<!-- MAIN -->
+<div class="main-content">
 
-            <div class="table-container shadow-sm">
-                <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-800 text-uppercase small">Hồ sơ khách hàng từ CTV</h6>
-                    <button class="btn btn-sm btn-outline-primary rounded-pill fw-700" onclick="exportData()"><i class="bi bi-download"></i></button>
+<div class="topbar">
+<h6 class="fw-800 mb-0">Admin Dashboard</h6>
+<button class="btn btn-light rounded-pill px-3 fw-700 small" onclick="logout()">Thoát</button>
+</div>
+
+<div class="container-fluid py-4">
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab-content">
+
+<!-- STATS -->
+<div class="row g-3 mb-4">
+<div class="col-md-3"><div class="stat-card text-center"><h3 id="statTotalLeads">0</h3></div></div>
+<div class="col-md-3"><div class="stat-card text-center"><h3 id="statPendingLeads">0</h3></div></div>
+<div class="col-md-3"><div class="stat-card text-center"><h3 id="statDoneLeads">0</h3></div></div>
+<div class="col-md-3"><div class="stat-card text-center"><h3 id="statTotalMoney">0</h3></div></div>
+</div>
+
+<!-- FILTER -->
+<div class="row g-3 mb-3">
+<div class="col-md-6">
+<div class="filter-box">
+<input id="searchName" class="filter-input" placeholder="Tìm khách...">
+</div>
+</div>
+
+<div class="col-md-6">
+<div class="filter-box">
+<select id="filterCTV" class="filter-input"></select>
+</div>
+</div>
+</div>
+
+<!-- TABLE -->
+<div class="table-container">
+<table class="table table-hover mb-0">
+<thead class="bg-light">
+<tr>
+<th>KHÁCH</th>
+<th>CTV</th>
+<th>PROJECT</th>
+<th>STATUS</th>
+<th>COMMISSION</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="leadTableBody"></tbody>
+</table>
+</div>
+
+</div>
+
+<!-- CTV -->
+<div id="tab-ctv" class="tab-content d-none">
+<div class="table-container">
+<table class="table mb-0">
+<thead class="bg-light">
+<tr><th>CTV</th><th>Email</th><th>Phone</th><th></th></tr>
+</thead>
+<tbody id="ctvTableBody"></tbody>
+</table>
+</div>
+</div>
+
+<!-- ACCOUNTS -->
+<div id="tab-accounts" class="tab-content d-none">
+<div class="table-container">
+<table class="table mb-0">
+<thead class="bg-light">
+<tr><th>Name</th><th>Email</th><th>Role</th></tr>
+</thead>
+<tbody id="accountTableBody"></tbody>
+</table>
+</div>
+</div>
+
+<!-- REPORT -->
+<div id="tab-reports" class="tab-content d-none">
+    <div class="row g-4 p-4">
+        <div class="col-md-8">
+            <div class="row g-4">
+                <div class="col-md-7">
+                    <div class="table-container p-4 h-100">
+                        <h6 class="fw-800 mb-4 text-success small"><i class="bi bi-graph-up-arrow me-2"></i>DOANH THU (VNĐ)</h6>
+                        <div id="monthlyChart" style="height: 250px;"></div>
+                    </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0 table-hover">
-                        <thead class="bg-light"><tr class="text-muted small fw-700"><th class="ps-4">KHÁCH HÀNG</th><th>NGUỒN CTV</th><th>DỰ ÁN</th><th>TIẾN ĐỘ</th><th>HOA HỒNG</th><th class="text-end pe-4">SỬA</th></tr></thead>
-                        <tbody id="leadTableBody"></tbody>
-                    </table>
+                <div class="col-md-5">
+                    <div class="table-container p-4 h-100">
+                        <h6 class="fw-800 mb-4 text-warning small"><i class="bi bi-pie-chart-fill me-2"></i>TRẠNG THÁI</h6>
+                        <div id="statusChart" style="height: 250px;"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="tab-ctv" class="tab-content d-none">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-800 mb-0">Quản lý Đối tác</h5>
-                <button class="btn btn-primary rounded-pill px-4 fw-700" onclick="window.openAddCTVModal()">
-                    <i class="bi bi-plus-lg me-1"></i> THÊM CTV MỚI
-                </button>
+        <div class="col-md-4">
+            <div class="table-container p-4 h-100">
+                <h6 class="fw-800 mb-4 text-primary small"><i class="bi bi-trophy-fill me-2"></i>TOP CỘNG TÁC VIÊN</h6>
+                <div id="topCTVList" class="d-flex flex-column gap-2">
+                    </div>
             </div>
-            <div class="table-container shadow-sm">
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead class="bg-light"><tr class="text-muted small fw-700"><th class="ps-4">CTV</th><th>LIÊN HỆ</th><th>KHU VỰC</th><th>NGÂN HÀNG</th><th class="text-end pe-4">THAO TÁC</th></tr></thead>
-                        <tbody id="ctvTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div id="tab-accounts" class="tab-content d-none">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-800 mb-0">Phân quyền hệ thống</h5>
-    </div>
-    <div class="table-container shadow-sm">
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="bg-light">
-                    <tr class="text-muted small fw-700">
-                        <th class="ps-4">TÀI KHOẢN</th>
-                        <th>EMAIL</th>
-                        <th>QUYỀN HẠN</th>
-                        <th class="text-end pe-4">THAO TÁC</th>
-                    </tr>
-                </thead>
-                <tbody id="accountTableBody"></tbody>
-            </table>
         </div>
     </div>
 </div>
+<div id="tab-calculator" class="tab-content d-none">
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h5 class="fw-800 mb-0 text-success"><i class="bi bi-calculator-fill me-2"></i>QUẢN LÝ QUYẾT TOÁN</h5>
+                <p class="text-muted small mb-0">Quản lý và tra cứu lịch sử hoa hồng khách hàng</p>
+            </div>
+            <button class="btn btn-success rounded-pill px-4 fw-700 shadow-sm" onclick="toggleCalcForm(true)">
+                <i class="bi bi-plus-lg me-2"></i>THÊM MỚI
+            </button>
+        </div>
 
-        <div id="tab-reports" class="tab-content d-none">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <h6 class="fw-800 mb-3 text-uppercase small text-primary">Hiệu suất theo tháng</h6>
-                        <div id="monthlyChart" class="text-center py-5 text-muted">Dữ liệu đang được tổng hợp...</div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <h6 class="fw-800 mb-3 text-uppercase small text-primary">Top CTV Xuất Sắc</h6>
-                        <div id="topCTVList" class="py-3 text-center text-muted small">Chưa có dữ liệu xếp hạng</div>
-                    </div>
-                </div>
+        <div id="calcListFilter" class="table-container p-3 mb-4 bg-white shadow-sm border-0">
+            <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchCalc" class="form-control border-start-0 ps-0 shadow-none fw-600" 
+                       placeholder="Tìm kiếm khách hàng hoặc số điện thoại..." oninput="renderCalcHistory()">
             </div>
         </div>
 
-    </div>
+        <div id="calcListView" class="table-container shadow-sm border-0">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">KHÁCH HÀNG</th>
+                        <th>GIÁ TRỊ HĐ</th>
+                        <th>HOA HỒNG</th>
+                        <th class="text-end pe-4">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody id="calcHistoryTableBody">
+                    </tbody>
+            </table>
+        </div>
 
-    <div class="modal fade" id="updateStatusModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-body p-4">
-                    <h5 class="fw-800 mb-3 text-success">Cập nhật tiến độ khách hàng</h5>
-                    <input type="hidden" id="currentLeadId">
+        <div id="calcFormView" class="table-container p-4 d-none mx-auto border-0 shadow-lg" style="max-width: 950px;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="fw-800 text-primary text-uppercase mb-0" id="calcFormTitle">Tính hoa hồng mới</h6>
+                <button class="btn-close shadow-none" onclick="toggleCalcForm(false)"></button>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-7 border-end pe-md-4">
                     <div class="mb-3">
-                        <label class="small fw-700 mb-2">Giai đoạn</label>
-                        <select id="statusSelect" class="form-select border-0 bg-light py-3 rounded-3 fw-600">
-                            <option value="1">Bước 1: Mới tiếp nhận</option>
-                            <option value="2">Bước 2: Đang khảo sát</option>
-                            <option value="3">Bước 3: Đã gửi báo giá</option>
-                            <option value="4">Bước 4: Khách đã chốt đơn</option>
-                            <option value="5">Bước 5: Đã tất toán hoa hồng</option>
-                        </select>
+                        <label class="small fw-700 mb-2 text-uppercase">1. Chọn khách hàng</label>
+                        <select id="calcLeadSelect" class="form-select border-2 rounded-3 py-2" onchange="handleCalculator()"></select>
                     </div>
-                    <div class="mb-4">
-                        <label class="small fw-700 mb-2">Hoa hồng ghi nhận (đ)</label>
-                        <input type="number" id="commissionValue" class="form-control border-0 bg-light py-3 rounded-3 fw-800 text-success">
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-light w-100 py-3 rounded-3 fw-700" data-bs-dismiss="modal">HỦY</button>
-                        <button class="btn btn-primary w-100 py-3 fw-800 rounded-3 shadow" onclick="window.confirmUpdate()">LƯU THAY ĐỔI</button>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="small fw-700 mb-2 text-uppercase">2. Giá trị HĐ (VNĐ)</label>
+                            <input type="number" id="calcTotalValue" class="form-control py-2" oninput="handleCalculator()">
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-700 mb-2 text-uppercase">3. % Hoa hồng</label>
+                            <input type="number" id="calcPercent" class="form-control py-2" oninput="handleCalculator()">
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-700 mb-2 text-uppercase">4. Viết thêm (VNĐ)</label>
+                            <input type="number" id="calcExtraValue" class="form-control py-2" oninput="handleCalculator()">
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-700 mb-2 text-uppercase">5. % Thuế/Phí chênh</label>
+                            <input type="number" id="calcTaxPercent" class="form-control py-2" value="10" oninput="handleCalculator()">
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="modal fade" id="editCTVModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-body p-4">
-                    <h5 class="fw-800 mb-3 text-primary">Chỉnh sửa thông tin CTV</h5>
-                    <input type="hidden" id="editCTVId">
-                    <div class="mb-3"><label class="small fw-700">Họ và Tên</label><input type="text" id="editCTVName" class="form-control border-0 bg-light py-2 rounded-3 fw-600"></div>
-                    <div class="mb-3"><label class="small fw-700">Số điện thoại</label><input type="tel" id="editCTVPhone" class="form-control border-0 bg-light py-2 rounded-3 fw-600"></div>
-                    <div class="mb-3"><label class="small fw-700">Khu vực</label><input type="text" id="editCTVArea" class="form-control border-0 bg-light py-2 rounded-3 fw-600"></div>
-                    <div class="mb-4"><label class="small fw-700">Ngân hàng & STK</label><input type="text" id="editCTVBank" class="form-control border-0 bg-light py-2 rounded-3 fw-600"></div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-light w-100 py-3 rounded-3 fw-700" data-bs-dismiss="modal">HỦY</button>
-                        <button class="btn btn-primary w-100 py-3 fw-800 rounded-3 shadow" onclick="window.confirmEditCTV()">CẬP NHẬT</button>
+                <div class="col-md-5 bg-light rounded-4 p-4">
+                    <div class="text-center bg-white p-3 rounded-3 shadow-sm mb-4 border border-success border-opacity-10">
+                        <div class="small text-muted fw-700 mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tổng hoa hồng</div>
+                        <h3 id="resTotalFinal" class="fw-800 text-success mb-0">0đ</h3>
                     </div>
+                    <button class="btn btn-success w-100 py-3 rounded-pill fw-800 shadow mb-2" onclick="saveCalcToFirebase()">
+                        XÁC NHẬN LƯU
+                    </button>
+                    <button class="btn btn-light w-100 py-2 rounded-pill fw-700 text-muted" onclick="toggleCalcForm(false)">QUAY LẠI</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
+<div id="tab-payout" class="tab-content d-none">
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h5 class="fw-800 mb-0 text-primary"><i class="bi bi-cash-stack me-2"></i>LỊCH SỬ CHI TRẢ</h5>
+                <p class="text-muted small mb-0">Theo dõi các đợt thanh toán hoa hồng cho CTV</p>
+            </div>
+            <button class="btn btn-primary rounded-pill px-4 fw-700 shadow-sm" onclick="togglePayoutForm(true)">
+                <i class="bi bi-plus-lg me-2"></i>LẬP PHIẾU CHI
+            </button>
+        </div>
 
-    <div class="modal fade" id="addCTVModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-body p-4">
-                    <h5 class="fw-800 mb-3 text-primary">Thêm Cộng tác viên mới</h5>
-                    <div class="mb-3"><label class="small fw-700">Họ và Tên</label><input type="text" id="addCTVName" class="form-control border-0 bg-light py-2 rounded-3" placeholder="Nguyễn Văn A"></div>
-                    <div class="mb-3"><label class="small fw-700">Email (Dùng đăng nhập)</label><input type="email" id="addCTVEmail" class="form-control border-0 bg-light py-2 rounded-3" placeholder="ctv@homestech.vn"></div>
-                    <div class="mb-3"><label class="small fw-700">Số điện thoại</label><input type="tel" id="addCTVPhone" class="form-control border-0 bg-light py-2 rounded-3"></div>
-                    <div class="mb-4"><label class="small fw-700">Mật khẩu tạm thời</label><input type="text" id="addCTVPass" class="form-control border-0 bg-light py-2 rounded-3" value="123456"></div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-light w-100 py-3 rounded-3 fw-700" data-bs-dismiss="modal">HỦY</button>
-                        <button class="btn btn-primary w-100 py-3 fw-800 rounded-3 shadow" onclick="window.confirmAddCTV()">TẠO TÀI KHOẢN</button>
-                    </div>
+        <div id="payoutListFilter" class="table-container p-3 mb-4 bg-white shadow-sm border-0">
+            <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchPayout" class="form-control border-start-0 ps-0 shadow-none fw-600" 
+                       placeholder="Tìm kiếm khách hàng hoặc nội dung chi trả..." oninput="renderPayoutHistory()">
+            </div>
+        </div>
+
+        <div id="payoutListView" class="table-container shadow-sm border-0 bg-white">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">KHÁCH HÀNG</th>
+                        <th>SỐ TIỀN CHI</th>
+                        <th>HÌNH THỨC</th>
+                        <th>GHI CHÚ</th>
+                        <th>NGÀY CHI</th>
+                        <th class="text-end pe-4">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody id="payoutHistoryTableBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="payoutFormView" class="table-container p-4 d-none border-0 shadow-lg mx-auto" style="max-width: 650px;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="fw-800 text-primary text-uppercase mb-0" id="payoutFormTitle">Lập phiếu chi trả hoa hồng</h6>
+                <button class="btn-close shadow-none" onclick="togglePayoutForm(false)"></button>
+            </div>
+            <input type="hidden" id="editPayoutId">
+            
+            <div class="mb-3">
+                <label class="small fw-700 mb-2 text-uppercase">Chọn khách hàng</label>
+                <select id="payoutLeadSelect" class="form-select border-2 rounded-3 py-2" onchange="updatePayoutInfo()"></select>
+            </div>
+            
+            <div class="row g-3 bg-light p-3 rounded-3 mb-3 border">
+                <div class="col-6">
+                    <label class="small fw-700 text-muted">TỔNG HOA HỒNG</label>
+                    <div id="payoutTotalComm" class="fw-800 text-dark">0đ</div>
                 </div>
+                <div class="col-6 border-start ps-4">
+                    <label class="small fw-700 text-muted">CÒN LẠI CẦN CHI</label>
+                    <div id="payoutRemain" class="fw-800 text-danger">0đ</div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="small fw-700 mb-2 text-uppercase">Số tiền chi (VNĐ)</label>
+                    <input type="number" id="payoutAmount" class="form-control border-2 py-2">
+                </div>
+                <div class="col-md-6">
+                    <label class="small fw-700 mb-2 text-uppercase">Hình thức</label>
+                    <select id="payoutMethod" class="form-select border-2 py-2">
+                        <option value="Chuyển khoản">Chuyển khoản</option>
+                        <option value="Tiền mặt">Tiền mặt</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="small fw-700 mb-2 text-uppercase">Ghi chú thanh toán</label>
+                <textarea id="payoutNote" class="form-control border-2" rows="2" placeholder="Ví dụ: Chuyển khoản đợt 1..."></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary w-100 py-3 rounded-pill fw-800 shadow" onclick="savePayout()">XÁC NHẬN LƯU</button>
+                <button class="btn btn-light px-4 rounded-pill fw-700 text-muted" onclick="togglePayoutForm(false)">QUAY LẠI</button>
             </div>
         </div>
     </div>
-    
-    <script type="module">
-        // Xử lý chuyển Tab SPA
-        document.querySelectorAll('#adminTabs .nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelectorAll('#adminTabs .nav-link').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-                
-                const targetTab = this.getAttribute('data-tab');
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.add('d-none'));
-                document.getElementById(targetTab).classList.remove('d-none');
-            });
-        });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="./js/app.js"></script>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ========================= -->
+<!-- MODAL UPDATE (BẮT BUỘC) -->
+<!-- ========================= -->
+<div class="modal fade" id="updateStatusModal">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content rounded-4">
+
+<div class="modal-header">
+<h5 class="modal-title">Cập nhật khách</h5>
+<button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+<input type="hidden" id="currentLeadId">
+
+<label>Trạng thái</label>
+<select id="statusSelect" class="form-select mb-3">
+<option value="1">Mới</option>
+<option value="2">Đang xử lý</option>
+<option value="3">Báo giá</option>
+<option value="4">Chốt</option>
+<option value="5">Hoàn tất</option>
+</select>
+
+<label>Hoa hồng</label>
+<input id="commissionValue" class="form-control" type="number">
+
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+<button class="btn btn-success" onclick="confirmUpdate()">Lưu</button>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="./js/app.js"></script>
+
+<!-- TAB SCRIPT -->
+<script>
+document.querySelectorAll("#adminTabs .nav-link").forEach(link => {
+    link.addEventListener("click", e => {
+        e.preventDefault();
+
+        // 1. Xử lý trạng thái Active trên Menu
+        document.querySelectorAll("#adminTabs .nav-link").forEach(l => l.classList.remove("active"));
+        link.classList.add("active");
+
+        // 2. Ẩn/Hiện nội dung Tab
+        const targetTabId = link.dataset.tab;
+        document.querySelectorAll(".tab-content").forEach(t => t.classList.add("d-none"));
+        
+        const targetEl = document.getElementById(targetTabId);
+        if (targetEl) {
+            targetEl.classList.remove("d-none");
+
+            // 3. KÍCH HOẠT LOGIC THEO TỪNG TAB
+            
+            // Tab Báo cáo: Vẽ biểu đồ
+            if (targetTabId === "tab-reports") {
+                setTimeout(() => {
+                    if (typeof window.renderReportChart === "function") {
+                        window.renderReportChart();
+                    }
+                }, 100);
+            } 
+            
+            // Tab Tính hoa hồng: Hiện danh sách lịch sử
+            else if (targetTabId === "tab-calculator") {
+                if (typeof window.toggleCalcForm === "function") {
+                    window.toggleCalcForm(false);
+                }
+                if (typeof window.renderCalcHistory === "function") {
+                    window.renderCalcHistory();
+                }
+            }
+
+            // Tab Lịch sử thanh toán: Tự động load danh sách phiếu chi cũ
+            else if (targetTabId === "tab-payout") {
+                if (typeof window.togglePayoutForm === "function") {
+                    window.togglePayoutForm(false); // Luôn hiện danh sách trước khi vào tab
+                }
+                if (typeof window.renderPayoutHistory === "function") {
+                    window.renderPayoutHistory(); // Vẽ lại các phiếu chi từ Firebase
+                }
+            }
+        }
+    });
+});
+</script>
+
 </body>
 </html>
