@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<title>Đăng ký Đối tác Homestech</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+--primary:#059669;
+--primary-dark:#064e3b;
+--bg-light:#f8fafc;
+}
+
+*{
+-webkit-tap-highlight-color:transparent;
+}
+
+body{
+font-family:'Plus Jakarta Sans',sans-serif;
+background:var(--bg-light);
+margin:0;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:14px;
+}
+
+
+/* CARD */
+.reg-card{
+background:#fff;
+border-radius:22px;
+box-shadow:0 10px 30px rgba(0,0,0,.06);
+width:100%;
+max-width:520px;
+overflow:hidden;
+}
+
+
+/* HEADER */
+.reg-header{
+background:linear-gradient(135deg,var(--primary-dark),var(--primary));
+color:#fff;
+text-align:center;
+padding:28px 18px;
+}
+
+.reg-header h3{
+font-weight:800;
+font-size:1.35rem;
+margin-top:10px;
+}
+
+.reg-header p{
+font-size:.85rem;
+opacity:.8;
+margin:0;
+}
+
+
+/* BODY */
+.reg-body{
+padding:22px 18px 26px;
+}
+
+
+/* INPUT */
+.form-label{
+font-size:.75rem;
+font-weight:700;
+color:#475569;
+margin-bottom:6px;
+}
+
+.input-custom{
+background:#f1f5f9;
+border:1px solid #e2e8f0;
+border-radius:12px;
+padding:12px 14px;
+font-size:15px;
+}
+
+.input-custom:focus{
+background:#fff;
+border-color:var(--primary);
+box-shadow:0 0 0 3px rgba(5,150,105,.12);
+}
+
+
+/* SECTION */
+.section-title{
+font-size:.75rem;
+color:var(--primary);
+font-weight:800;
+text-transform:uppercase;
+border-bottom:1px solid #f1f5f9;
+padding-bottom:8px;
+margin:22px 0 14px;
+}
+
+
+/* BUTTON */
+.btn-register{
+background:var(--primary);
+color:#fff;
+border:none;
+border-radius:14px;
+padding:15px;
+font-weight:800;
+width:100%;
+margin-top:18px;
+font-size:.95rem;
+box-shadow:0 8px 18px rgba(5,150,105,.2);
+transition:.25s;
+}
+
+.btn-register:active{
+transform:scale(.98);
+background:var(--primary-dark);
+}
+
+
+/* MOBILE FIX */
+@media(max-width:576px){
+
+body{
+padding:10px;
+align-items:flex-start;
+}
+
+.reg-card{
+border-radius:18px;
+}
+
+.reg-header{
+padding:22px 14px;
+}
+
+.reg-body{
+padding:18px 14px 22px;
+}
+
+.row{
+--bs-gutter-x:10px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="reg-card">
+
+<div class="reg-header">
+<i class="bi bi-shield-lock-fill fs-2"></i>
+<h3>Đăng ký Đối tác</h3>
+<p>Tham gia hệ sinh thái công nghệ Homestech</p>
+</div>
+
+<div class="reg-body">
+
+<form id="fullRegisterForm">
+
+<div class="section-title mt-0">Thông tin đăng nhập</div>
+
+<div class="mb-3">
+<label class="form-label">EMAIL CÔNG VIỆC</label>
+<input type="email" id="email"
+class="form-control input-custom"
+placeholder="partner@example.com"
+required>
+</div>
+
+<div class="mb-3">
+<label class="form-label">MẬT KHẨU TIẾP CẬN</label>
+<input type="password" id="pass"
+class="form-control input-custom"
+placeholder="Tối thiểu 6 ký tự"
+required>
+</div>
+
+
+<div class="section-title">Thông tin đối tác</div>
+
+<div class="row">
+
+<div class="col-7 mb-3">
+<label class="form-label">HỌ VÀ TÊN</label>
+<input type="text" id="fullName"
+class="form-control input-custom"
+placeholder="Nguyễn Văn A"
+required>
+</div>
+
+<div class="col-5 mb-3">
+<label class="form-label">SỐ ĐIỆN THOẠI</label>
+<input type="tel" id="phone"
+class="form-control input-custom"
+placeholder="09xxx"
+required>
+</div>
+
+</div>
+
+<div class="mb-3">
+<label class="form-label">KHU VỰC HOẠT ĐỘNG</label>
+<input type="text" id="area"
+class="form-control input-custom"
+placeholder="VD: Đà Lạt, Lâm Đồng">
+</div>
+
+
+<div class="section-title">Thông tin thanh toán (Hoa hồng)</div>
+
+<div class="mb-3">
+<label class="form-label">TÊN NGÂN HÀNG & SỐ TÀI KHOẢN</label>
+<input type="text" id="bankInfo"
+class="form-control input-custom"
+placeholder="Vietcombank - 101xxx">
+</div>
+
+<button type="submit" class="btn-register">
+XÁC NHẬN ĐĂNG KÝ HỢP TÁC
+</button>
+
+<div class="text-center mt-3">
+<a href="login.html"
+class="text-decoration-none small fw-semibold text-muted">
+Đã có tài khoản? Đăng nhập ngay
+</a>
+</div>
+
+</form>
+
+</div>
+</div>
+
+<script type="module" src="./js/register.js"></script>
+
+</body>
+</html>

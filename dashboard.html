@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Homestech Admin | CRM Dashboard</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #059669; --bg: #f8fafc; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #1e293b; }
+        
+        /* Tab Styling */
+        .nav-pills .nav-link { color: #64748b; font-weight: 700; border-radius: 12px; padding: 10px 20px; transition: 0.3s; border: 1px solid transparent; }
+        .nav-pills .nav-link.active { background-color: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); border-color: var(--primary); }
+        .nav-pills .nav-link:hover:not(.active) { background-color: #e2e8f0; }
+
+        .stat-card { background: #fff; border-radius: 20px; border: 1px solid #f1f5f9; padding: 20px; transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .table-container { background: #fff; border-radius: 24px; border: 1px solid #f1f5f9; overflow: hidden; }
+        
+        .filter-box { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 10px 15px; }
+        .filter-input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.9rem; font-weight: 600; }
+        
+        .step-pill { font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+        .step-1 { background: #f1f5f9; color: #64748b; }
+        .step-2 { background: #fef9c3; color: #a16207; }
+        .step-3 { background: #dcfce7; color: #166534; }
+        .step-4 { background: #dbeafe; color: #1e40af; }
+        .step-5 { background: #059669; color: #fff; }
+
+        .ctv-tag { background: #ecfdf5; color: #059669; padding: 2px 10px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar bg-white border-bottom sticky-top py-2">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <div class="bg-primary p-2 rounded-3 text-white"><i class="bi bi-grid-1x2-fill"></i></div>
+                <span class="fw-800 fs-5 d-none d-md-inline">HOMESTECH <span class="text-primary">CRM</span></span>
+            </div>
+            
+            <ul class="nav nav-pills small" id="adminTabs">
+                <li class="nav-item"><a class="nav-link active" data-tab="tab-dashboard" href="#"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" data-tab="tab-ctv" href="#"><i class="bi bi-people me-1"></i> CTV</a></li>
+                <li class="nav-item"><a class="nav-link" data-tab="tab-reports" href="#"><i class="bi bi-bar-chart me-1"></i> Báo cáo</a></li>
+                <li class="nav-item"><a class="nav-link" data-tab="tab-accounts" href="#"><i class="bi bi-shield-lock me-1"></i> Tài khoản</a></li>
+            </ul>
+
+            <button class="btn btn-light rounded-pill px-3 fw-700 small" onclick="logout()">Thoát</button>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        
+        <div id="tab-dashboard" class="tab-content">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="stat-card text-center"><small class="text-muted fw-600">Tổng khách hàng</small><h3 id="statTotalLeads" class="fw-800 mb-0">0</h3></div></div>
+                <div class="col-md-3"><div class="stat-card text-center"><small class="text-muted fw-600">Đang xử lý</small><h3 id="statPendingLeads" class="fw-800 mb-0 text-warning">0</h3></div></div>
+                <div class="col-md-3"><div class="stat-card text-center"><small class="text-muted fw-600">Đã chốt đơn</small><h3 id="statDoneLeads" class="fw-800 mb-0 text-success">0</h3></div></div>
+                <div class="col-md-3"><div class="stat-card text-center bg-primary text-white"><small class="opacity-75 fw-600">Tổng hoa hồng (đ)</small><h3 id="statTotalMoney" class="fw-800 mb-0">0</h3></div></div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4"><div class="filter-box d-flex align-items-center"><i class="bi bi-search text-muted me-2"></i><input type="text" id="searchName" class="filter-input" placeholder="Tìm tên khách hoặc SĐT..."></div></div>
+                <div class="col-md-4"><div class="filter-box d-flex align-items-center"><i class="bi bi-person-badge text-muted me-2"></i><select id="filterCTV" class="filter-input border-0"><option value="">Tất cả CTV</option></select></div></div>
+                <div class="col-md-4"><div class="filter-box d-flex align-items-center"><i class="bi bi-calendar-event text-muted me-2"></i><select id="filterTime" class="filter-input border-0"><option value="">Tất cả thời gian</option></select></div></div>
+            </div>
+
+            <div class="table-container shadow-sm">
+                <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-800 text-uppercase small">Hồ sơ khách hàng từ CTV</h6>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill fw-700" onclick="exportData()"><i class="bi bi-download"></i></button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0 table-hover">
+                        <thead class="bg-light"><tr class="text-muted small fw-700"><th class="ps-4">KHÁCH HÀNG</th><th>NGUỒN CTV</th><th>DỰ ÁN</th><th>TIẾN ĐỘ</th><th>HOA HỒNG</th><th class="text-end pe-4">SỬA</th></tr></thead>
+                        <tbody id="leadTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-ctv" class="tab-content d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-800 mb-0">Quản lý Đối tác</h5>
+                <button class="btn btn-primary rounded-pill px-4 fw-700" onclick="window.openAddCTVModal()">
+                    <i class="bi bi-plus-lg me-1"></i> THÊM CTV MỚI
+                </button>
+            </div>
+            <div class="table-container shadow-sm">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light"><tr class="text-muted small fw-700"><th class="ps-4">CTV</th><th>LIÊN HỆ</th><th>KHU VỰC</th><th>NGÂN HÀNG</th><th class="text-end pe-4">THAO TÁC</th></tr></thead>
+                        <tbody id="ctvTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="tab-accounts" class="tab-content d-none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-800 mb-0">Phân quyền hệ thống</h5>
+    </div>
+    <div class="table-container shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="text-muted small fw-700">
+                        <th class="ps-4">TÀI KHOẢN</th>
+                        <th>EMAIL</th>
+                        <th>QUYỀN HẠN</th>
+                        <th class="text-end pe-4">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody id="accountTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+        <div id="tab-reports" class="tab-content d-none">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <h6 class="fw-800 mb-3 text-uppercase small text-primary">Hiệu suất theo tháng</h6>
+                        <div id="monthlyChart" class="text-center py-5 text-muted">Dữ liệu đang được tổng hợp...</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <h6 class="fw-800 mb-3 text-uppercase small text-primary">Top CTV Xuất Sắc</h6>
+                        <div id="topCTVList" class="py-3 text-center text-muted small">Chưa có dữ liệu xếp hạng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="updateStatusModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-body p-4">
+                    <h5 class="fw-800 mb-3 text-success">Cập nhật tiến độ khách hàng</h5>
+                    <input type="hidden" id="currentLeadId">
+                    <div class="mb-3">
+                        <label class="small fw-700 mb-2">Giai đoạn</label>
+                        <select id="statusSelect" class="form-select border-0 bg-light py-3 rounded-3 fw-600">
+                            <option value="1">Bước 1: Mới tiếp nhận</option>
+                            <option value="2">Bước 2: Đang khảo sát</option>
+                            <option value="3">Bước 3: Đã gửi báo giá</option>
+                            <option value="4">Bước 4: Khách đã chốt đơn</option>
+                            <option value="5">Bước 5: Đã tất toán hoa hồng</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="small fw-700 mb-2">Hoa hồng ghi nhận (đ)</label>
+                        <input type="number" id="commissionValue" class="form-control border-0 bg-light py-3 rounded-3 fw-800 text-success">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light w-100 py-3 rounded-3 fw-700" data-bs-dismiss="modal">HỦY</button>
+                        <button class="btn btn-primary w-100 py-3 fw-800 rounded-3 shadow" onclick="window.confirmUpdate()">LƯU THAY ĐỔI</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editCTVModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-body p-4">
+                    <h5 class="fw-800 mb-3 text-primary">Chỉnh sửa thông tin CTV</h5>
+                    <input type="hidden" id="editCTVId">
+                    <div class="mb-3"><label class="small fw-700">Họ và Tên</label><input type="text" id="editCTVName" class="form-control border-0 bg-light py-2 rounded-3 fw-600"></div>
+                    <div class="mb-3"><label class="small fw-700">Số điện thoại</label><input type="tel" id="editCTVPhone" class="form-control border-0 bg-light py-2 rounded-3 fw-600"></div>
+                    <div class="mb-3"><label class="small fw-700">Khu vực</label><input type="text" id="editCTVArea" class="form-control border-0 bg-light py-2 rounded-3 fw-600"></div>
+                    <div class="mb-4"><label class="small fw-700">Ngân hàng & STK</label><input type="text" id="editCTVBank" class="form-control border-0 bg-light py-2 rounded-3 fw-600"></div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light w-100 py-3 rounded-3 fw-700" data-bs-dismiss="modal">HỦY</button>
+                        <button class="btn btn-primary w-100 py-3 fw-800 rounded-3 shadow" onclick="window.confirmEditCTV()">CẬP NHẬT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addCTVModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-body p-4">
+                    <h5 class="fw-800 mb-3 text-primary">Thêm Cộng tác viên mới</h5>
+                    <div class="mb-3"><label class="small fw-700">Họ và Tên</label><input type="text" id="addCTVName" class="form-control border-0 bg-light py-2 rounded-3" placeholder="Nguyễn Văn A"></div>
+                    <div class="mb-3"><label class="small fw-700">Email (Dùng đăng nhập)</label><input type="email" id="addCTVEmail" class="form-control border-0 bg-light py-2 rounded-3" placeholder="ctv@homestech.vn"></div>
+                    <div class="mb-3"><label class="small fw-700">Số điện thoại</label><input type="tel" id="addCTVPhone" class="form-control border-0 bg-light py-2 rounded-3"></div>
+                    <div class="mb-4"><label class="small fw-700">Mật khẩu tạm thời</label><input type="text" id="addCTVPass" class="form-control border-0 bg-light py-2 rounded-3" value="123456"></div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light w-100 py-3 rounded-3 fw-700" data-bs-dismiss="modal">HỦY</button>
+                        <button class="btn btn-primary w-100 py-3 fw-800 rounded-3 shadow" onclick="window.confirmAddCTV()">TẠO TÀI KHOẢN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Xử lý chuyển Tab SPA
+        document.querySelectorAll('#adminTabs .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('#adminTabs .nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                const targetTab = this.getAttribute('data-tab');
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.add('d-none'));
+                document.getElementById(targetTab).classList.remove('d-none');
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
