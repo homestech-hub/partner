@@ -1,7 +1,6 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, push, onValue, query, orderByChild, equalTo, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
 window.logout = () => signOut(auth);
 
 // --- 1. LOGIC ĐỊNH VỊ GPS ---
@@ -78,10 +77,16 @@ if (leadForm) {
 
 // --- 4. LOAD DANH SÁCH KHÁCH HÀNG ---
 function loadData(uid) {
+    const listContainer = document.getElementById("customerStatusList");
+    if (listContainer) listContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div></div>';
+
     onValue(query(ref(db, "COMPANIES/homestech/leads"), orderByChild("sourceCTV"), equalTo(uid)), snap => {
         const data = snap.val() || {};
+        
+        let totalCommission = 0;
+        let totalPaid = 0;
+        let stats = { total: 0, pending: 0, success: 0 };
         let leadHtml = "";
-        let stats = { money: 0, total: 0, pending: 0, success: 0 };
         const items = Object.entries(data).reverse();
 
         items.forEach(([key, item]) => {
@@ -89,13 +94,27 @@ function loadData(uid) {
             const step = parseInt(item.step) || 1;
             const commission = parseInt(item.commission) || 0;
 
-            if (step >= 2 && step <= 3) stats.pending++;
-            else if (step >= 4) {
+            if (step >= 2 && step <= 3) {
+                stats.pending++;
+            } else if (step >= 4) {
                 stats.success++;
-                stats.money += commission;
+                totalCommission += commission;
+            }
+
+            if (item.payments) {
+                Object.values(item.payments).forEach(p => {
+                    totalPaid += parseInt(p.amount || 0);
+                });
             }
 
             const dateCreated = item.dateDisplay || new Date(item.createdAt).toLocaleDateString('vi-VN');
+
+            // --- SỬA LỖI LINK VỊ TRÍ TẠI ĐÂY ---
+            // Kiểm tra nếu address không tồn tại hoặc là số 0 thì dùng mặc định là Dalat
+            const validAddress = (item.address && item.address !== "0" && item.address !== "undefined") 
+                                 ? item.address 
+                                 : "Dalat";
+            const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(validAddress)}`;
 
             leadHtml += `
                 <div class="item-card shadow-sm border-0">
@@ -131,7 +150,7 @@ function loadData(uid) {
                             <i class="bi bi-briefcase me-1"></i>${item.project || 'Dự án'}
                         </div>
                         <div class="d-flex gap-2">
-                            <a href="http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(item.address || 'Dalat')}" 
+                            <a href="${mapLink}" 
                                target="_blank" class="btn btn-light btn-sm rounded-pill px-3 border fw-700">VỊ TRÍ</a>
                             <button class="btn btn-success btn-sm rounded-pill px-3 fw-700 shadow-sm" onclick="viewLeadDetail('${key}')">CHI TIẾT</button>
                         </div>
@@ -139,44 +158,72 @@ function loadData(uid) {
                 </div>`;
         });
 
-        // CẬP NHẬT UI ĐỒNG BỘ: Sử dụng class thay vì ID để cập nhật cho tất cả các tab hiển thị
-        const moneyFormatted = stats.money.toLocaleString('vi-VN') + 'đ';
+        const currentBalance = totalCommission - totalPaid;
+        const displayBalance = Math.max(0, currentBalance);
+        const moneyFormatted = displayBalance.toLocaleString('vi-VN') + 'đ';
         
         document.querySelectorAll(".statTotalMoney").forEach(el => el.innerText = moneyFormatted);
         document.querySelectorAll(".statTotalLeads").forEach(el => el.innerText = stats.total);
         document.querySelectorAll(".statPending").forEach(el => el.innerText = stats.pending);
         document.querySelectorAll(".statSuccess").forEach(el => el.innerText = stats.success);
-
-        // Hiển thị danh sách khách hàng
-        document.getElementById("customerStatusList").innerHTML = leadHtml || '<p class="text-center py-5 opacity-50">Chưa có khách hàng</p>';
+        
+        if (listContainer) listContainer.innerHTML = leadHtml || '<p class="text-center py-5 opacity-50">Chưa có khách hàng</p>';
     });
 }
-
 // --- 5. LOAD LỊCH SỬ THƯỞNG (TẤT TOÁN) ---
+// --- 5. LOAD LỊCH SỬ THƯỞNG (QUÉT TỪ PAYMENTS TRONG LEADS) ---
 function loadPayoutHistory(uid) {
     const container = document.getElementById("payoutHistoryContainer");
     if (!container) return;
 
-    onValue(ref(db, `COMPANIES/homestech/payouts/${uid}`), snap => {
-        const data = snap.val();
-        if (!data) {
+    // Hiển thị trạng thái đang tải
+    container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success spinner-border-sm"></div></div>';
+
+    // Tìm tất cả khách hàng của CTV này
+    const q = query(ref(db, "COMPANIES/homestech/leads"), orderByChild("sourceCTV"), equalTo(uid));
+
+    onValue(q, (snap) => {
+        const data = snap.val() || {};
+        const allPayments = [];
+
+        // Gom tất cả các đợt chi trả từ bên trong các Lead
+        Object.entries(data).forEach(([leadId, lead]) => {
+            if (lead.payments) {
+                Object.entries(lead.payments).forEach(([pId, p]) => {
+                    allPayments.push({
+                        ...p,
+                        customerName: lead.name || "Khách hàng",
+                        totalCommission: parseInt(lead.commission || 0)
+                    });
+                });
+            }
+        });
+
+        if (allPayments.length === 0) {
             container.innerHTML = '<p class="text-center py-5 text-muted small">Chưa có lịch sử nhận thưởng.</p>';
             return;
         }
 
+        // Sắp xếp mới nhất lên đầu
+        allPayments.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
         let html = "";
-        Object.values(data).reverse().forEach(p => {
-            const date = new Date(p.createdAt).toLocaleDateString('vi-VN');
+        allPayments.forEach(p => {
+            const date = p.createdAt ? new Date(p.createdAt).toLocaleDateString('vi-VN') : "-";
             html += `
                 <div class="item-card border-0 shadow-sm mb-3" style="border-left: 4px solid #059669 !important;">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
-                            <div class="small text-muted mb-1">Xác nhận tất toán: ${date}</div>
+                            <div class="small text-muted mb-1" style="font-size: 0.65rem;">Ngày chi: ${date}</div>
                             <h6 class="fw-800 mb-0 text-success">+${parseInt(p.amount).toLocaleString()}đ</h6>
                         </div>
-                        <span class="badge bg-success-subtle text-success rounded-pill px-3">HOÀN TẤT</span>
+                        <span class="badge bg-success-subtle text-success rounded-pill px-2" style="font-size: 0.6rem;">HOÀN TẤT</span>
                     </div>
-                    <div class="small text-muted mt-2 pt-2 border-top">${p.note || 'Tất toán hoa hồng hệ thống'}</div>
+                    <div class="mt-2 pt-2 border-top small">
+                        <div class="d-flex justify-content-between mb-1"><span>Khách hàng:</span><b>${p.customerName}</b></div>
+                        <div class="d-flex justify-content-between"><span>Tổng hoa hồng hồ sơ:</span><b>${p.totalCommission.toLocaleString()}đ</b></div>
+                        <div class="text-muted mt-2 p-2 bg-light rounded-2 italic" style="font-size:0.7rem">${p.note || 'Tất toán hệ thống'}</div>
+                    </div>
                 </div>`;
         });
         container.innerHTML = html;
@@ -193,12 +240,31 @@ window.deleteLead = (key) => {
 };
 
 window.openEditLead = (key, name, phone, project, note) => {
-    document.getElementById("editKey").value = key;
-    document.getElementById("editName").value = name;
-    document.getElementById("editPhone").value = phone;
-    document.getElementById("editProject").value = project;
-    document.getElementById("editNote").value = (note === "undefined" || !note) ? "" : note;
-    new bootstrap.Modal(document.getElementById('editLeadModal')).show();
+    // Tìm các phần tử HTML theo ID đã tạo ở Bước 1
+    const elKey = document.getElementById("editKey");
+    const elName = document.getElementById("editName");
+    const elPhone = document.getElementById("editPhone");
+    const elProject = document.getElementById("editProject");
+    const elNote = document.getElementById("editNote");
+
+    // Kiểm tra xem Modal có tồn tại trong HTML không
+    const modalEl = document.getElementById('editLeadModal');
+
+    if (modalEl && elKey && elName) {
+        // Gán giá trị vào các ô input
+        elKey.value = key;
+        elName.value = name || "";
+        elPhone.value = phone || "";
+        elProject.value = project || "Khác";
+        elNote.value = (note === "undefined" || !note) ? "" : note;
+
+        // Mở Modal (Sử dụng API của Bootstrap 5)
+        const editModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        editModal.show();
+    } else {
+        console.error("Lỗi: Thiếu Modal hoặc ID trong file HTML.");
+        alert("Hệ thống đang cập nhật giao diện, vui lòng thử lại sau!");
+    }
 };
 
 const editForm = document.getElementById("editLeadForm");
@@ -272,28 +338,45 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// --- XỬ LÝ CHUYỂN TAB ---
+// Thay thế đoạn xử lý chuyển Tab cũ bằng đoạn này
+// --- XỬ LÝ CHUYỂN TAB AN TOÀN ---
 document.querySelectorAll('.nav-item-binh').forEach(item => {
-    item.addEventListener('click', function(e) {
+    item.onclick = function(e) {
+        // Nếu là thẻ <a> (Chính sách) thì để trình duyệt tự chuyển trang
         if (this.tagName.toLowerCase() === 'a') return;
+        
         e.preventDefault();
 
-        document.querySelectorAll('.nav-item-binh').forEach(i => i.classList.remove('active'));
+        // 1. Lấy ID mục tiêu
+        const targetSelector = this.getAttribute('data-bs-target');
+        if (!targetSelector) return;
+
+        // 2. Cập nhật UI Menu
+        document.querySelectorAll('.nav-item-binh').forEach(nav => nav.classList.remove('active'));
         this.classList.add('active');
 
-        const targetSelector = this.getAttribute('data-bs-target');
-        const targetEl = document.querySelector(targetSelector);
-        
-        if (targetEl) {
-            // Sử dụng cơ chế ẩn/hiện class trực tiếp để tránh lỗi Illegal invocation
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.remove('show', 'active');
-            });
-            targetEl.classList.add('show', 'active');
-        }
-    });
-});
+        // 3. Cập nhật UI Nội dung Tab
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.remove('show', 'active');
+        });
 
+        const targetPane = document.querySelector(targetSelector);
+        if (targetPane) {
+            targetPane.classList.add('show', 'active');
+        }
+
+        // 4. Kích hoạt nạp dữ liệu dựa trên Tab
+        const user = auth.currentUser;
+        if (user) {
+            const targetId = targetSelector.replace('#', '');
+            if (targetId === "tab-done") {
+                loadPayoutHistory(user.uid); // Nạp lịch sử khi nhấn Tab Lịch sử
+            } else if (targetId === "tab-leads") {
+                loadData(user.uid); // Nạp khách hàng khi quay lại Tab Khách hàng
+            }
+        }
+    };
+});
 // --- 8. LOGIC CHỈNH SỬA HỒ SƠ ---
 
 // Hàm mở Modal và điền dữ liệu hiện tại vào Form
