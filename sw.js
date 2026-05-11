@@ -1,5 +1,6 @@
 const CACHE_NAME = 'homestech-ctv-v1';
 const urlsToCache = [
+  'login.html',
   'ctv.html',
   'chinhsach.html',
   './js/ctv.js',
