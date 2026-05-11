@@ -68,8 +68,8 @@ function initAdminSystem() {
 // =========================
 // APPLY FILTER DASHBOARD
 // =========================
+//
 window.applyFilters = () => {
-
     if (!appReady) return;
 
     const searchName = (document.getElementById("searchName")?.value || "").toLowerCase();
@@ -79,7 +79,6 @@ window.applyFilters = () => {
     let s = { total: 0, pending: 0, done: 0, money: 0 };
 
     allLeads.forEach(([key, l]) => {
-
         const u = allUsers[l.sourceCTV];
         const ctvName = u ? (u.fullName || u.name || u.email) : "Trực tiếp";
 
@@ -90,9 +89,7 @@ window.applyFilters = () => {
         const matchCTV = !filterCTV || l.sourceCTV === filterCTV;
 
         if (matchName && matchCTV) {
-
             s.total++;
-
             const step = parseInt(l.step) || 1;
             if (step >= 2 && step <= 3) s.pending++;
             if (step >= 4) s.done++;
@@ -101,50 +98,43 @@ window.applyFilters = () => {
             const labels = ["", "Mới tiếp nhận", "Đang khảo sát", "Đã báo giá", "Đã chốt đơn", "Tất toán"];
 
             html += `
-                <tr>
-                    <td class="ps-4">
-                        <div class="fw-800">${l.name || "N/A"}</div>
-                        <div class="small text-muted">${l.phone || ""}</div>
-                    </td>
-
-                    <td>
-                        <span class="ctv-tag">${ctvName}</span>
-                    </td>
-
-                    <td class="small fw-700 text-primary">
-                        ${l.project || "N/A"}
-                    </td>
-
-                    <td>
-                        <span class="step-pill step-${step}">
-                            ${labels[step]}
-                        </span>
-                    </td>
-
-                    <td class="fw-700">
-                        ${parseInt(l.commission || 0).toLocaleString()}đ
-                    </td>
-
-                    <td class="text-end pe-4">
-                        <button class="btn btn-success btn-sm"
-                            onclick="window.openUpdateModal('${key}', ${step}, ${l.commission || 0})">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
+    <tr>
+        <td class="ps-4">
+            <div class="fw-800">${l.name || "N/A"}</div>
+            <div class="small text-muted">${l.phone || ""}</div>
+        </td>
+        <td><span class="ctv-tag">${ctvName}</span></td>
+        <td class="small fw-700 text-primary">${l.project || "N/A"}</td>
+        <td><span class="step-pill step-${step}">${labels[step]}</span></td>
+        <td class="fw-700">${parseInt(l.commission || 0).toLocaleString()}đ</td>
+        
+        <td class="text-end pe-4">
+            <div class="d-flex gap-1 justify-content-end align-items-center">
+                <button class="btn btn-success btn-sm" onclick="window.openUpdateModal('${key}', ${step}, ${l.commission || 0})">
+                    <i class="bi bi-arrow-repeat"></i>
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="window.openEditLeadModal('${key}', '${l.name}', '${l.phone}', '${l.project}')">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="window.deleteLead('${key}')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+`;
         }
     });
 
     document.getElementById("leadTableBody").innerHTML =
         html || `<tr><td colspan="6" class="text-center py-4">Không có dữ liệu</td></tr>`;
 
-    document.getElementById("statTotalLeads").innerText = s.total;
-    document.getElementById("statPendingLeads").innerText = s.pending;
-    document.getElementById("statDoneLeads").innerText = s.done;
-    document.getElementById("statTotalMoney").innerText = s.money.toLocaleString() + "đ";
+    // Cập nhật các thẻ thống kê
+    if(document.getElementById("statTotalLeads")) document.getElementById("statTotalLeads").innerText = s.total;
+    if(document.getElementById("statPendingLeads")) document.getElementById("statPendingLeads").innerText = s.pending;
+    if(document.getElementById("statDoneLeads")) document.getElementById("statDoneLeads").innerText = s.done;
+    if(document.getElementById("statTotalMoney")) document.getElementById("statTotalMoney").innerText = s.money.toLocaleString() + "đ";
 };
-
 // =========================
 // MODAL UPDATE LEAD
 // =========================
@@ -218,6 +208,7 @@ function renderCTVTable(users) {
                     <td>${u.email || ""}</td>
                     <td>${u.phone || ""}</td>
                     <td>${u.area || ""}</td>
+                    <td>${u.bankInfo || ""}</td>
                     <td class="text-end pe-4">
                         <button onclick="window.deleteUser('${uid}')"
                             class="btn btn-danger btn-sm">
@@ -761,4 +752,64 @@ window.deletePayout = async (leadId, pId) => {
             window.renderPayoutHistory();
         } catch (e) { alert("Lỗi: " + e.message); }
     }
+};
+
+//thêm mới KH
+// Mở Modal
+window.openAddLeadModal = () => {
+    new bootstrap.Modal(document.getElementById('addLeadModal')).show();
+};
+
+// Lưu dữ liệu
+document.getElementById("addLeadForm").onsubmit = async (e) => {
+    e.preventDefault();
+    
+    const newLead = {
+        name: document.getElementById("newLeadName").value,
+        phone: document.getElementById("newLeadPhone").value,
+        project: document.getElementById("newLeadProject").value,
+        sourceCTV: document.getElementById("newLeadSource").value || "Admin",
+        step: 1,
+        status: "Đang xử lý",
+        createdAt: new Date().toISOString(),
+        dateDisplay: new Date().toLocaleDateString('vi-VN'),
+        commission: 0
+    };
+
+    try {
+        await push(ref(db, "COMPANIES/homestech/leads"), newLead);
+        bootstrap.Modal.getInstance(document.getElementById('addLeadModal')).hide();
+        document.getElementById("addLeadForm").reset();
+        // table sẽ tự động cập nhật nếu bạn đang dùng onValue để lắng nghe
+    } catch (error) {
+        alert("Lỗi: " + error.message);
+    }
+};
+
+//hàm sửa xoá khách hàng
+// --- HÀM XÓA KHÁCH HÀNG ---
+window.deleteLead = (key) => {
+    if (confirm("Bạn có chắc chắn muốn xóa hồ sơ khách hàng này không?")) {
+        remove(ref(db, `COMPANIES/homestech/leads/${key}`))
+            .then(() => alert("Đã xóa thành công!"))
+            .catch(err => alert("Lỗi khi xóa: " + err.message));
+    }
+};
+
+// --- HÀM MỞ MODAL SỬA ---
+window.openEditLeadModal = (key, name, phone, project, note) => {
+    // 1. Gán dữ liệu cũ vào các ô Input (Sử dụng các ID đã có trong Modal addLeadModal)
+    document.getElementById("newLeadName").value = name;
+    document.getElementById("newLeadPhone").value = phone;
+    document.getElementById("newLeadProject").value = project;
+    
+    // Lưu lại ID của khách hàng đang sửa vào Dataset của Form
+    document.getElementById("addLeadForm").dataset.editId = key;
+    
+    // 2. Đổi tiêu đề Modal để người dùng biết đang ở chế độ chỉnh sửa
+    document.querySelector("#addLeadModal h5").innerText = "CHỈNH SỬA HỒ SƠ";
+    
+    // 3. Hiện Modal
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('addLeadModal'));
+    modal.show();
 };
