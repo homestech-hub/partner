@@ -128,20 +128,19 @@ body::before{
 .brand-logo{
     width:68px;
     height:68px;
-
-    background:rgba(5,150,105,.1);
-
-    color:var(--primary);
-
+    
     border-radius:20px;
 
     display:flex;
     align-items:center;
     justify-content:center;
 
-    font-size:30px;
-
     margin:0 auto 20px;
+}
+.brand-logo img{
+    width:100px;
+    height:100px;
+    object-fit:contain;
 }
 
 /* TEXT */
@@ -249,10 +248,39 @@ h4{
     }
 
     .brand-logo{
-        width:60px;
-        height:60px;
-        font-size:26px;
-    }
+    width:75px;
+    height:75px;
+
+    background:rgba(5,150,105,.1);
+    color:var(--primary);
+
+    border-radius:20px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    margin:0 auto 20px;
+}
+.brand-logo img{
+    width:65px;
+    height:65px;
+    object-fit:contain;
+}
+}
+.brand-title{
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+/* HOMESTECH - xanh chính */
+.brand-main{
+    color:#22A06B;   /* xanh logo */
+}
+
+/* Partner - xanh đậm hơn */
+.brand-sub{
+    color:#14532D;   /* xanh đậm */
 }
 
 </style>
@@ -267,12 +295,13 @@ h4{
         <div class="text-center">
 
             <div class="brand-logo">
-                <i class="bi bi-cpu-fill"></i>
-            </div>
+    <img src="https://homestechjsc.vn/wp-content/uploads/2026/05/partner-1.png" alt="Homestech Logo">
+</div>
 
-            <h4 class="text-dark mb-1">
-                Partner Hub
-            </h4>
+            <h4 class="brand-title mb-1">
+    <span class="brand-main">HOMESTECH</span>
+    <span class="brand-sub">Partner</span>
+</h4>
 
             <p class="text-muted small mb-4">
                 Chào mừng bạn quay lại với Homestech
