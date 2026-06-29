@@ -25,10 +25,21 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         if (snapshot.exists()) {
             const userData = snapshot.val();
             if (userData.role === "admin") {
-                // Đúng quyền Admin -> Vào Dashboard
-                location.href = "dashboard.html";
+                
+                // 🌟 TỰ ĐỘNG NHẬN DIỆN THIẾT BỊ HOẶC NGUỒN TRANG TRUY CẬP 🌟
+                const isMobileAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const isMobileWidth = window.innerWidth <= 768;
+                const cameFromMobileDash = document.referrer.includes("mobiledash.html");
+
+                if (isMobileAgent || isMobileWidth || cameFromMobileDash) {
+                    // Nếu là điện thoại hoặc đi từ trang mobiledash ra -> Vào giao diện di động
+                    location.href = "mobiledash.html";
+                } else {
+                    // Nếu là máy tính -> Vào giao diện Dashboard PC
+                    location.href = "dashboard.html";
+                }
+
             } else {
-                // Có tài khoản nhưng không phải Admin (ví dụ CTV nhầm trang)
                 err.innerText = "Lỗi: Bạn không có quyền truy cập trang quản trị!";
                 await auth.signOut();
             }
