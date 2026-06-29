@@ -3,6 +3,7 @@ const urlsToCache = [
   '/', 
   '/login.html',
   '/ctv.html',
+  '/mobiledash.html',
   '/chinhsach.html',
   '/manifest.json',
   '/js/ctv.js', // Sử dụng đường dẫn tuyệt đối từ gốc domain
