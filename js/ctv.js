@@ -82,11 +82,11 @@ if (leadForm) {
 
 // --- 4. LOAD DANH SÁCH KHÁCH HÀNG ---
 // --- 4. LOAD DANH SÁCH KHÁCH HÀNG (CẬP NHẬT TRẠNG THÁI & LÀM MỜ) ---
+// --- 4. LOAD DANH SÁCH KHÁCH HÀNG (CẬP NHẬT MINH BẠCH GIÁ TRỊ BÁO GIÁ) ---
 function loadData(uid) {
     const listContainer = document.getElementById("customerStatusList");
     if (listContainer) listContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div></div>';
 
-    // 🌟 SỬA DÒNG NÀY: Kiểm tra kỹ nếu phần tử tồn tại thì mới lấy value, không thì mặc định là chuỗi rỗng ""
     const searchInput = document.getElementById("searchCTVLeads");
     const searchKeyword = searchInput ? searchInput.value.toLowerCase().trim() : "";
 
@@ -134,41 +134,62 @@ function loadData(uid) {
             const mapLink = `http://maps.google.com/?q=${encodeURIComponent(validAddress)}`;
             const archiveClass = (step >= 4) ? "lead-archived" : "";
 
-            leadHtml += `
-                <div class="item-card shadow-sm ${archiveClass}">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <h6 class="fw-800 m-0 text-dark text-uppercase">${item.name}</h6>
-                            <div class="small text-muted mb-1" style="font-size: 0.7rem;">
-                                <i class="bi bi-calendar3 me-1"></i>Ngày tạo: ${dateCreated}
-                            </div>
-                            <div class="small fw-700 text-success mt-1">
-                                <i class="bi bi-telephone-fill me-1"></i>${item.phone}
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <span class="step-badge step-${step} d-inline-block mb-2">${statusLabels[step] || "Đang xử lý"}</span>
-                            <div class="small fw-800 ${commission > 0 ? 'text-success' : 'text-muted'}" style="font-size: 0.85rem;">
-                                ${commission > 0 ? '+' + commission.toLocaleString('vi-VN') + 'đ' : '0đ'}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                        <div class="small text-muted fw-600"><i class="bi bi-briefcase me-1"></i>${item.project || 'Dự án'}</div>
-                        <div class="d-flex gap-2">
-                            <div class="dropdown d-inline-block">
-                                <button class="btn btn-light btn-sm rounded-pill px-2 border" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 p-2">
-                                    <li><a class="dropdown-item small fw-700 py-2" href="javascript:void(0)" onclick="openEditLead('${key}', '${item.name}', '${item.phone}', '${item.project}', \`${item.note || ''}\`)"><i class="bi bi-pencil me-2 text-success"></i>CHỈNH SỬA</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item small fw-700 py-2 text-danger" href="javascript:void(0)" onclick="deleteLead('${key}')"><i class="bi bi-trash me-2"></i>XÓA HỒ SƠ</a></li>
-                                </ul>
-                            </div>
-                            <a href="${mapLink}" target="_blank" class="btn btn-light btn-sm rounded-pill px-3 border fw-700">VỊ TRÍ</a>
-                            <button class="btn btn-success btn-sm rounded-pill px-3 fw-700 shadow-sm" onclick="viewLeadDetail('${key}')">CHI TIẾT</button>
-                        </div>
-                    </div>
-                </div>`;
+            // Tính toán an toàn giá trị hợp đồng/báo giá được đồng bộ từ Admin
+const contractValue = parseInt(item.contractValue || item.totalAmount || 0);
+
+// Tính toán tỷ lệ phần trăm hoa hồng thực tế để hiển thị minh bạch
+let commPercentText = "";
+if (contractValue > 0 && commission > 0) {
+    const percent = (commission / contractValue) * 100;
+    commPercentText = ` (${percent.toFixed(1)}%)`;
+}
+
+leadHtml += `
+    <div class="item-card shadow-sm ${archiveClass}">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+                <h6 class="fw-800 m-0 text-dark text-uppercase">${item.name}</h6>
+                <div class="small text-muted mb-1" style="font-size: 0.7rem;">
+                    <i class="bi bi-calendar3 me-1"></i>Ngày tạo: ${dateCreated}
+                </div>
+                <div class="small fw-700 text-success mt-1">
+                    <i class="bi bi-telephone-fill me-1"></i>${item.phone}
+                </div>
+            </div>
+            <div class="text-end">
+                <span class="step-badge step-${step} d-inline-block mb-1">${statusLabels[step] || "Đang xử lý"}</span>
+            </div>
+        </div>
+
+        <div class="p-3 my-3 border border-success border-opacity-10 shadow-sm" style="background-color: #f8fafc; border-radius: 14px;">
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-2" style="font-size: 0.75rem; border-bottom: 1px dashed #cbd5e1;">
+                <span class="text-muted fw-600"><i class="bi bi-file-earmark-spreadsheet me-1.5 text-secondary"></i>Giá trị báo giá</span>
+                <span class="text-dark fw-800">${contractValue > 0 ? contractValue.toLocaleString('vi-VN') + 'đ' : '<span class="text-muted fw-600 italic">Đang tính toán...</span>'}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center" style="font-size: 0.75rem;">
+                <span class="text-muted fw-600"><i class="bi bi-gift-fill me-1.5 text-success"></i>Hoa hồng của bạn${commPercentText}</span>
+                <b class="${commission > 0 ? 'text-success' : 'text-muted'} fw-800" style="font-size: 0.85rem;">
+                    ${commission > 0 ? '+' + commission.toLocaleString('vi-VN') + 'đ' : '0đ'}
+                </b>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-2 pt-2">
+            <div class="small text-muted fw-600"><i class="bi bi-briefcase me-1"></i>${item.project || 'Dự án'}</div>
+            <div class="d-flex gap-2">
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-light btn-sm rounded-pill px-2 border" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 p-2">
+                        <li><a class="dropdown-item small fw-700 py-2" href="javascript:void(0)" onclick="openEditLead('${key}', '${item.name}', '${item.phone}', '${item.project}', \`${item.note || ''}\`)"><i class="bi bi-pencil me-2 text-success"></i>CHỈNH SỬA</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item small fw-700 py-2 text-danger" href="javascript:void(0)" onclick="deleteLead('${key}')"><i class="bi bi-trash me-2"></i>XÓA HỒ SƠ</a></li>
+                    </ul>
+                </div>
+                <a href="${mapLink}" target="_blank" class="btn btn-light btn-sm rounded-pill px-3 border fw-700">VỊ TRÍ</a>
+                <button class="btn btn-success btn-sm rounded-pill px-3 fw-700 shadow-sm" onclick="viewLeadDetail('${key}')">CHI TIẾT</button>
+            </div>
+        </div>
+    </div>`;
         });
 
         const currentBalance = totalCommission - totalPaid;
@@ -182,7 +203,6 @@ function loadData(uid) {
         calculateCTVReports(rawLeadsForReport);
     });
 }
-
 // Ràng buộc sự kiện gõ phím tìm kiếm thời gian thực
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchCTVLeads");
