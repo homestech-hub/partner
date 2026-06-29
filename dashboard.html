@@ -354,29 +354,127 @@ font-weight:700;font-size:.75rem;
 
 <!-- REPORT TAB[cite: 12] -->
 <div id="tab-reports" class="tab-content d-none">
-    <div class="row g-4 p-4">
-        <div class="col-md-8">
-            <div class="row g-4">
-                <div class="col-md-7">
-                    <div class="table-container p-4 h-100">
-                        <h6 class="fw-800 mb-4 text-success small"><i class="bi bi-graph-up-arrow me-2"></i>DOANH THU (VNĐ)</h6>
-                        <div id="monthlyChart" style="height: 250px;"></div>
+    <div class="container-fluid py-3">
+        
+        <!-- 1. BỘ LỌC ĐA NĂNG ĐIỀU HƯỚNG BÁO CÁO -->
+        <div class="table-container p-3 mb-4 bg-white shadow-sm border-0 rounded-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-3">
+                    <label class="small fw-700 text-muted text-uppercase mb-1 d-block">Lọc dòng thời gian</label>
+                    <select id="repFilterTime" class="form-select fw-600 shadow-none border-2" onchange="window.processAdvancedReports()">
+                        <option value="all">Toàn bộ thời gian</option>
+                        <option value="month_current">Tháng hiện tại</option>
+                        <option value="quarter_current">Quý hiện tại</option>
+                        <option value="year_current">Năm hiện tại</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="small fw-700 text-muted text-uppercase mb-1 d-block">Lọc theo Cộng tác viên</label>
+                    <select id="repFilterCTV" class="form-select fw-600 shadow-none border-2" onchange="window.processAdvancedReports()">
+                        <!-- Sẽ được điền tự động bằng dữ liệu CTV thực tế -->
+                    </select>
+                </div>
+                <div class="col-md-6 text-md-end pt-3 pt-md-0">
+                    <span class="badge bg-success-subtle text-success p-2 rounded-3 fw-700 small">
+                        <i class="bi bi-shield-shaded me-1"></i>Dữ liệu cập nhật thời gian thực
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. HỆ THỐNG THẺ KPI ĐỘNG CỦA PHÂN HỆ BÁO CÁO -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="modern-stat-card stat-blue">
+                    <div class="stat-icon"><i class="bi bi-wallet2"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Doanh số HĐ (Bộ lọc)</div>
+                        <div class="stat-value text-dark" id="repStatContract" style="font-size: 1.6rem;">0đ</div>
                     </div>
                 </div>
-                <div class="col-md-5">
-                    <div class="table-container p-4 h-100">
-                        <h6 class="fw-800 mb-4 text-warning small"><i class="bi bi-pie-chart-fill me-2"></i>TRẠNG THÁI</h6>
-                        <div id="statusChart" style="height: 250px;"></div>
+            </div>
+            <div class="col-md-3">
+                <div class="modern-stat-card stat-money">
+                    <div class="stat-icon"><i class="bi bi-gift-fill"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Hoa hồng CTV (Bộ lọc)</div>
+                        <div class="stat-value text-success" id="repStatComm" style="font-size: 1.6rem;">0đ</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="modern-stat-card stat-orange">
+                    <div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Hồ sơ đã chốt</div>
+                        <div class="stat-value text-warning" id="repStatCountSuccess" style="font-size: 1.6rem;">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="modern-stat-card stat-green">
+                    <div class="stat-icon"><i class="bi bi-percent"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Tỷ lệ chốt / Tổng phễu</div>
+                        <div class="stat-value text-primary" id="repStatConversion" style="font-size: 1.6rem;">0%</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="table-container p-4 h-100">
-                <h6 class="fw-800 mb-4 text-primary small"><i class="bi bi-trophy-fill me-2"></i>TOP CỘNG TÁC VIÊN</h6>
-                <div id="topCTVList" class="d-flex flex-column gap-2"></div>
+
+        <!-- 3. KHU VỰC BIỂU ĐỒ TRỰC QUAN -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-8">
+                <div class="table-container p-4 bg-white shadow-sm border-0 h-100 rounded-4">
+                    <h6 class="fw-800 mb-4 text-success small text-uppercase"><i class="bi bi-bar-chart-line-fill me-2"></i>Diễn biến doanh thu tháng (Năm hiện hành)</h6>
+                    <div id="monthlyChart" style="height: 250px;"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="table-container p-4 bg-white shadow-sm border-0 h-100 rounded-4">
+                    <h6 class="fw-800 mb-4 text-warning small text-uppercase"><i class="bi bi-pie-chart-fill me-2"></i>Tỷ trọng trạng thái phễu</h6>
+                    <div id="statusChart" style="height: 250px;"></div>
+                </div>
             </div>
         </div>
+
+        <!-- 4. DANH SÁCH CHI TIẾT THEO BỘ LỌC VÀ THỐNG KÊ TOP ĐỐI TÁC -->
+        <div class="row g-4">
+            <!-- Danh sách khách hàng lọc động -->
+            <div class="col-md-8">
+                <div class="table-container bg-white shadow-sm border-0 rounded-4">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-800 m-0 text-dark small text-uppercase"><i class="bi bi-list-stars me-2"></i>Danh sách hồ sơ khớp bộ lọc</h6>
+                        <span id="repTableCount" class="badge bg-secondary text-white fw-700">0 khách hàng</span>
+                    </div>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="bg-light sticky-top" style="z-index: 10;">
+                                <tr>
+                                    <th class="ps-3">Khách hàng</th>
+                                    <th>Cộng tác viên</th>
+                                    <th>Giá trị HĐ</th>
+                                    <th>Hoa hồng</th>
+                                    <th class="pe-3">Tiến độ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repTableBody">
+                                <!-- Dữ liệu kết xuất động từ app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Cộng tác viên hiệu quả -->
+            <div class="col-md-4">
+                <div class="table-container p-4 bg-white shadow-sm border-0 rounded-4 h-100">
+                    <h6 class="fw-800 mb-4 text-primary small text-uppercase"><i class="bi bi-trophy-fill me-2"></i>Xếp hạng nguồn CTV thành công</h6>
+                    <div id="topCTVList" class="d-flex flex-column gap-2"></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
