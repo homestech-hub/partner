@@ -20,203 +20,62 @@
     <style>
         :root { --primary: #059669; --bg-body: #f8fafc; --surface: #ffffff; --text-main: #1e293b; --radius-lg: 18px; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); color: var(--text-main); padding-bottom: 100px; }
-        .app-header { background: #ffffff; padding: 15px 0; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 1000; }
+        .app-header { background: #ffffff; padding: 10px 16px; position: sticky; top: 0; z-index: 1000; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; }
+        .brand-box { display: flex; align-items: center; gap: 10px; }
+        .brand-logo { height: 38px; width: auto; object-fit: contain; }
+        .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+        .brand-title { font-size: 18px; font-weight: 800; color: #16a34a; letter-spacing: .4px; }
+        .brand-sub { font-size: 13px; color: #64748b; font-weight: 600; }
         .stat-card { border-radius: var(--radius-lg); padding: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.03); height: 100%; }
         .stat-card.bg-primary-gradient { background: linear-gradient(135deg, #065f46 0%, #059669 100%); color: white; }
         .item-card { background: var(--surface); border-radius: 20px; border: 1px solid #f1f5f9; padding: 1.25rem; margin-bottom: 1rem; }
-        
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #ffffff; border-top: 1px solid #f1f5f9; z-index: 2000; display: flex; }
         .nav-item-binh { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; background: none; border: none; padding: 0; transition: 0.3s; text-decoration: none; }
         .nav-item-binh i { font-size: 1.4rem; margin-bottom: 2px; }
         .nav-item-binh span { font-size: 0.7rem; font-weight: 700; }
         .nav-item-binh.active { color: var(--primary); }
-
         .fab-btn { position: fixed; bottom: 95px; right: 20px; background: var(--primary); color: white; padding: 12px 20px; border-radius: 50px; font-weight: 700; box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3); border: none; z-index: 1000; }
         .input-mobile { padding: 14px 18px; border-radius: 14px; border: 1.5px solid #e2e8f0; background-color: #f8fafc; }
-        /* ================= HEADER ================= */
-
-.app-header{
-    background:#ffffff;
-    padding:10px 16px;
-    position:sticky;
-    top:0;
-    z-index:1000;
-    box-shadow:0 2px 12px rgba(0,0,0,.06);
-}
-
-.header-inner{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-/* ===== BRAND ===== */
-
-.brand-box{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.brand-logo{
-    height:38px;
-    width:auto;
-    object-fit:contain;
-}
-
-.brand-text{
-    display:flex;
-    flex-direction:column;
-    line-height:1.1;
-}
-
-.brand-title{
-    font-size:18px;
-    font-weight:800;
-    color:#16a34a;
-    letter-spacing:.4px;
-}
-
-.brand-sub{
-    font-size:13px;
-    color:#64748b;
-    font-weight:600;
-}
-
-/* ===== NOTIFICATION ===== */
-
-.notif-btn{
-    width:42px;
-    height:42px;
-    border:none;
-    border-radius:50%;
-    background:#f1f5f9;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:18px;
-    color:#16a34a;
-    position:relative;
-}
-
-#notifBadge{
-    position:absolute;
-    top:6px;
-    right:6px;
-    width:8px;
-    height:8px;
-    background:#ef4444;
-    border-radius:50%;
-    display:none;
-}
-:root{
-    --bs-primary: #059669;      /* Bootstrap primary */
-    --bs-primary-rgb: 5,150,105;
-}
-/* icon */
-.support-btn{
-    width:auto;
-    height:auto;
-    padding:10px 14px;
-    border-radius:18px;
-
-    background:#ecfdf5;
-    border:1.5px solid #bbf7d0;
-
-    color:#059669;
-    gap:10px;
-
-    box-shadow:none;
-
-    transition:.2s ease;
-}
-
-.support-btn:active{
-    transform:scale(.97);
-}
-
-.support-btn i{
-    font-size:18px;
-    color:#059669;
-}
-
-.support-info{
-    display:flex;
-    flex-direction:column;
-    line-height:1.05;
-    text-align:left;
-}
-
-.support-title{
-    font-size:10px;
-    font-weight:700;
-    color:#16a34a;
-    opacity:.9;
-}
-
-.support-phone{
-    font-size:15px;
-    font-weight:800;
-    color:#047857;
-    letter-spacing:.2px;
-}
-
-/* Màu sắc trạng thái cho từng bước xử lý trên Mobile */
-.step-badge {
-    font-size: 0.65rem;
-    padding: 4px 10px;
-    border-radius: 50px;
-    font-weight: 700;
-}
-.step-1 { background-color: #f1f5f9; color: #64748b; } /* Mới tiếp nhận */
-.step-2 { background-color: #fef9c3; color: #a16207; } /* Đang khảo sát */
-.step-3 { background-color: #e0f2fe; color: #0369a1; } /* Đã báo giá */
-.step-4 { background-color: #dcfce7; color: #15803d; } /* Đã chốt đơn */
-.step-5 { background-color: #fee2e2; color: #b91c1c; } /* Hủy bỏ */
-
-/* Hiệu ứng làm mờ khách hàng đã hoàn tất */
-.lead-archived {
-    opacity: 0.55;
-    filter: grayscale(30%);
-    border: 1px dashed #cbd5e1 !important;
-    background-color: #f8fafc !important;
-}
+        .support-btn { width: auto; height: auto; padding: 10px 14px; border-radius: 18px; background: #ecfdf5; border: 1.5px solid #bbf7d0; color: #059669; gap: 10px; box-shadow: none; transition: .2s ease; }
+        .support-btn:active { transform: scale(.97); }
+        .support-info { display: flex; flex-direction: column; line-height: 1.05; text-align: left; }
+        .support-title { font-size: 10px; font-weight: 700; color: #16a34a; opacity: .9; }
+        .support-phone { font-size: 15px; font-weight: 800; color: #047857; letter-spacing: .2px; }
+        .step-badge { font-size: 0.65rem; padding: 4px 10px; border-radius: 50px; font-weight: 700; }
+        .step-1 { background-color: #f1f5f9; color: #64748b; }
+        .step-2 { background-color: #fef9c3; color: #a16207; }
+        .step-3 { background-color: #e0f2fe; color: #0369a1; }
+        .step-4 { background-color: #dcfce7; color: #15803d; }
+        .step-5 { background-color: #fee2e2; color: #b91c1c; }
+        .lead-archived { opacity: 0.55; filter: grayscale(30%); border: 1px dashed #cbd5e1 !important; background-color: #f8fafc !important; }
     </style>
 </head>
 <body>
 
     <nav class="app-header">
-    <div class="container header-inner">
-
-        <!-- BRAND -->
-        <a href="index.html" class="brand-box text-decoration-none">
-
-            <img 
-                src="https://homestechjsc.vn/wp-content/uploads/2026/05/partner.png"
-                alt="Homestech Logo"
-                class="brand-logo">
-
-            <div class="brand-text">
-                <span class="brand-title">HOMESTECH</span>
-                <span class="brand-sub">Partner</span>
-            </div>
-
-        </a>
-
-        <!-- Hỗ trợ CTV -->
-<button class="notif-btn support-btn" onclick="window.location.href='tel:0784289289'">
-    <i class="bi bi-headset"></i>
-    <div class="support-info">
-        <span class="support-title">Hỗ trợ CTV</span>
-        <span class="support-phone">0784 289 289</span>
-    </div>
-</button>
-    </div>
-</nav>
+        <div class="container header-inner">
+            <a href="index.html" class="brand-box text-decoration-none">
+                <img src="https://homestechjsc.vn/wp-content/uploads/2026/05/partner.png" alt="Homestech Logo" class="brand-logo">
+                <div class="brand-text">
+                    <span class="brand-title">HOMESTECH</span>
+                    <span class="brand-sub">Partner</span>
+                </div>
+            </a>
+            <button class="notif-btn support-btn" onclick="window.location.href='tel:0784289289'">
+                <i class="bi bi-headset"></i>
+                <div class="support-info">
+                    <span class="support-title">Hỗ trợ CTV</span>
+                    <span class="support-phone">0784 289 289</span>
+                </div>
+            </button>
+        </div>
+    </nav>
 
     <div class="container px-4">
         <div class="tab-content pt-2" id="pills-tabContent">
             
+            <!-- TAB KHÁCH HÀNG (ĐÃ FIX SẠCH LỖI TRÙNG LẶP ID) -->
             <div class="tab-pane fade show active" id="tab-leads" role="tabpanel">
                 <div class="row g-3 mb-4">
                     <div class="col-6 col-md-3"><div class="stat-card bg-primary-gradient shadow-sm"><p class="opacity-75 small mb-1">Thu nhập</p><h4 class="statTotalMoney fw-800 m-0">0đ</h4></div></div>
@@ -224,20 +83,20 @@
                     <div class="col-6 col-md-3"><div class="stat-card bg-white border shadow-sm"><p class="text-muted small mb-1">Đang xử lý</p><h4 class="statPending fw-800 m-0 text-warning">0</h4></div></div>
                     <div class="col-6 col-md-3"><div class="stat-card bg-white border shadow-sm"><p class="text-muted small mb-1">Đã chốt</p><h4 class="statSuccess fw-800 m-0 text-success">0</h4></div></div>
                 </div>
-                <div class="tab-pane fade show active" id="tab-leads" role="tabpanel">
-    <div class="mb-3">
-        <div class="input-group">
-            <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 14px 0 0 14px;"><i class="bi bi-search"></i></span>
-            <input type="text" id="searchCTVLeads" class="form-control input-mobile border-start-0 ps-0 shadow-none fw-600" 
-                   placeholder="Tìm tên, SĐT, dự án của khách..." style="border-radius: 0 14px 14px 0;">
-        </div>
-    </div>
+                
+                <!-- Thanh tìm kiếm đa năng -->
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 14px 0 0 14px;"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchCTVLeads" class="form-control input-mobile border-start-0 ps-0 shadow-none fw-600" placeholder="Tìm tên, SĐT, dự án của khách..." style="border-radius: 0 14px 14px 0;">
+                    </div>
+                </div>
 
-    <div id="customerStatusList"></div>
-</div>
+                <!-- Phân vùng kết xuất duy nhất -->
                 <div id="customerStatusList"></div>
             </div>
 
+            <!-- TAB LỊCH SỬ CHI TRẢ -->
             <div class="tab-pane fade" id="tab-done" role="tabpanel">
                 <div class="row g-3 mb-4">
                     <div class="col-6 col-md-3"><div class="stat-card bg-primary-gradient shadow-sm"><p class="opacity-75 small mb-1">Thu nhập</p><h4 class="statTotalMoney fw-800 m-0">0đ</h4></div></div>
@@ -249,6 +108,39 @@
                 <div id="payoutHistoryContainer"></div>
             </div>
 
+            <!-- TAB BÁO CÁO DOANH THU -->
+            <div class="tab-pane fade" id="tab-ctv-reports" role="tabpanel">
+                <div class="item-card border-0 shadow-sm mb-3 bg-white">
+                    <h6 class="fw-800 text-success text-uppercase small mb-3"><i class="bi bi-pie-chart-fill me-2"></i>Tổng quan thu nhập</h6>
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded-3">
+                                <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Tháng này</div>
+                                <b id="repMonth" class="text-dark small" style="font-size: 0.85rem;">0đ</b>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded-3">
+                                <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Quý này</div>
+                                <b id="repQuarter" class="text-primary small" style="font-size: 0.85rem;">0đ</b>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded-3">
+                                <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Năm này</div>
+                                <b id="repYear" class="text-success small" style="font-size: 0.85rem;">0đ</b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-card border-0 shadow-sm bg-white">
+                    <h6 class="fw-800 text-dark text-uppercase small mb-3"><i class="bi bi-calendar-range-fill me-2"></i>Chi tiết theo dòng thời gian</h6>
+                    <div id="reportTimelineContainer" class="d-flex flex-column gap-2"></div>
+                </div>
+            </div>
+
+            <!-- TAB THÔNG TIN CÁ NHÂN -->
             <div class="tab-pane fade" id="tab-profile" role="tabpanel">
                 <div class="item-card text-center mb-3">
                     <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
@@ -259,9 +151,7 @@
                 </div>
 
                 <div class="item-card shadow-sm border-0 position-relative">
-                    <button class="btn btn-sm btn-light border rounded-circle position-absolute" 
-                            style="top: 15px; right: 15px; width: 35px; height: 35px;" 
-                            onclick="openEditProfileModal()">
+                    <button class="btn btn-sm btn-light border rounded-circle position-absolute" style="top: 15px; right: 15px; width: 35px; height: 35px;" onclick="openEditProfileModal()">
                         <i class="bi bi-pencil-fill text-primary"></i>
                     </button>
                     <h6 class="fw-800 mb-3 small text-uppercase text-success">Hồ sơ đối tác</h6>
@@ -274,31 +164,20 @@
         </div>
     </div>
 
+    <!-- THANH ĐIỀU HƯỚNG BOTTOM NAV -->
     <div class="bottom-nav">
-    <button class="nav-item-binh active" data-bs-target="#tab-leads" type="button">
-        <i class="bi bi-person-lines-fill"></i><span>Khách hàng</span>
-    </button>
-    
-    <button class="nav-item-binh" data-bs-target="#tab-done" type="button">
-        <i class="bi bi-wallet2"></i><span>Lịch sử</span>
-    </button>
-    <button class="nav-item-binh" data-bs-target="#tab-ctv-reports" type="button">
-        <i class="bi bi-bar-chart-line-fill"></i><span>Báo cáo</span>
-    </button>
-    
-    <a href="chinhsach.html" class="nav-item-binh">
-        <i class="bi bi-shield-check"></i><span>Chính sách</span>
-    </a>
-    
-    <button class="nav-item-binh" data-bs-target="#tab-profile" type="button">
-        <i class="bi bi-person-circle"></i><span>Cá nhân</span>
-    </button>
-</div>
+        <button class="nav-item-binh active" data-bs-target="#tab-leads" type="button"><i class="bi bi-person-lines-fill"></i><span>Khách hàng</span></button>
+        <button class="nav-item-binh" data-bs-target="#tab-done" type="button"><i class="bi bi-wallet2"></i><span>Lịch sử</span></button>
+        <button class="nav-item-binh" data-bs-target="#tab-ctv-reports" type="button"><i class="bi bi-bar-chart-line-fill"></i><span>Báo cáo</span></button>
+        <a href="chinhsach.html" class="nav-item-binh"><i class="bi bi-shield-check"></i><span>Chính sách</span></a>
+        <button class="nav-item-binh" data-bs-target="#tab-profile" type="button"><i class="bi bi-person-circle"></i><span>Cá nhân</span></button>
+    </div>
 
     <button class="fab-btn shadow-lg" data-bs-toggle="modal" data-bs-target="#addModal">
         <i class="bi bi-plus-lg fs-5"></i><span> HỢP TÁC</span>
     </button>
 
+    <!-- MODAL SỬA PROFILE -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered px-3">
             <div class="modal-content border-0 rounded-4 shadow-lg">
@@ -317,117 +196,55 @@
             </div>
         </div>
     </div>
-    <div class="tab-pane fade" id="tab-ctv-reports" role="tabpanel">
-    <div class="item-card border-0 shadow-sm mb-3 bg-white">
-        <h6 class="fw-800 text-success text-uppercase small mb-3"><i class="bi bi-pie-chart-fill me-2"></i>Tổng quan thu nhập</h6>
-        <div class="row g-2 text-center">
-            <div class="col-4">
-                <div class="p-2 bg-light rounded-3">
-                    <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Tháng này</div>
-                    <b id="repMonth" class="text-dark small" style="font-size: 0.85rem;">0đ</b>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="p-2 bg-light rounded-3">
-                    <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Quý này</div>
-                    <b id="repQuarter" class="text-primary small" style="font-size: 0.85rem;">0đ</b>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="p-2 bg-light rounded-3">
-                    <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Năm này</div>
-                    <b id="repYear" class="text-success small" style="font-size: 0.85rem;">0đ</b>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="item-card border-0 shadow-sm bg-white">
-        <h6 class="fw-800 text-dark text-uppercase small mb-3"><i class="bi bi-calendar-range-fill me-2"></i>Chi tiết theo dòng thời gian</h6>
-        <div id="reportTimelineContainer" class="d-flex flex-column gap-2">
-            </div>
-    </div>
-</div>
+    <!-- MODAL CHI TIẾT KHÁCH -->
     <div class="modal fade" id="leadDetailModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow-lg"><div class="modal-body p-4" id="leadDetailBody"></div></div></div></div>
+    
+    <!-- MODAL THÊM KHÁCH HÀNG MỚI -->
     <div class="modal fade" id="addModal" tabindex="-1"><div class="modal-dialog modal-fullscreen-sm-down modal-dialog-centered"><div class="modal-content border-0 shadow-lg"><div class="modal-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-4"><h4 class="fw-800 m-0 text-success text-uppercase" style="font-size: 1.1rem;">Thông tin dự án</h4><button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button></div>
         <form id="addLeadForm">
             <div class="mb-3"><input type="text" id="cName" class="form-control input-mobile" placeholder="Tên khách hàng" required></div>
             <div class="mb-3"><input type="tel" id="cPhone" class="form-control input-mobile" placeholder="Số điện thoại" required></div>
-            <div class="mb-3"><select id="cProject" class="form-select input-mobile"><option value="Công trình Nhà ở">Công trình Nhà ở / Villa</option><option value="Dự án Villa/Resort">Dự án Khách sạn / Resort</option><option value="Cơ sở Kinh doanh">Dự án Nhà Hàng / cafe ...</option><option value="Khác">Khác...</option></select></div>
+            <div class="mb-3"><select id="cProject" class="form-select input-mobile"><option value="Công trình Nhà ở">Công trình Nhà ở / Villa</option><option value="Dự án Villa/Resort">Dự án Kh sạn / Resort</option><option value="Cơ sở Kinh doanh">Dự án Nhà Hàng / cafe ...</option><option value="Khác">Khác...</option></select></div>
             <div class="mb-3"><div class="input-group"><input type="text" id="cAddress" class="form-control input-mobile" placeholder="Nhập địa chỉ hoặc lấy tọa độ Vị trí..." required><button class="btn btn-success px-3" type="button" onclick="getCurrentLocation()"><i class="bi bi-geo-alt"></i></button></div></div>
             <div class="mb-3"><textarea id="cNote" class="form-control input-mobile" rows="2" placeholder="Nội dung yêu cầu..."></textarea></div>
             <div class="mb-4"><label class="small fw-700 mb-2 text-success">Hình ảnh công trình</label><input type="file" id="img-1" class="form-control input-mobile mb-2" onchange="handleImageStep(1)"><input type="file" id="img-2" class="form-control input-mobile mb-2 d-none" onchange="handleImageStep(2)"><input type="file" id="img-3" class="form-control input-mobile d-none" onchange="handleImageStep(3)"><div id="imagePreview" class="d-flex gap-2 mt-2 flex-wrap"></div></div>
             <div class="d-flex gap-2"><button type="button" class="btn btn-light w-100 py-3 rounded-pill fw-700" data-bs-dismiss="modal">ĐÓNG</button><button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-800 shadow">GỬI NGAY</button></div>
         </form>
     </div></div></div></div>
+
+    <!-- MODAL SỬA KHÁCH HÀNG MỚI -->
     <div class="modal fade" id="editLeadModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered px-3">
-        <div class="modal-content border-0 rounded-4 shadow-lg">
-            <div class="modal-body p-4">
-                <h5 class="fw-800 mb-4 text-center text-success text-uppercase">Cập nhật thông tin</h5>
-                <form id="updateLeadForm">
-                    <input type="hidden" id="editKey">
-                    
-                    <div class="mb-3">
-                        <label class="small fw-700 mb-1">HỌ TÊN</label>
-                        <input type="text" id="editName" class="form-control input-mobile" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="small fw-700 mb-1">SỐ ĐIỆN THOẠI</label>
-                        <input type="tel" id="editPhone" class="form-control input-mobile" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="small fw-700 mb-1">DỰ ÁN</label>
-                        <select id="editProject" class="form-select input-mobile">
-                            <option value="Công trình Nhà ở">Công trình Nhà ở</option>
-                            <option value="Dự án Villa/Resort">Dự án Villa / Resort</option>
-                            <option value="Cơ sở Kinh doanh">Cơ sở Kinh doanh</option>
-                            <option value="Khác">Khác...</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="small fw-700 mb-1">GHI CHÚ</label>
-                        <textarea id="editNote" class="form-control input-mobile" rows="2"></textarea>
-                    </div>
-                    
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light w-100 py-3 rounded-pill fw-700" data-bs-dismiss="modal">HỦY</button>
-                        <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-800 shadow">LƯU THAY ĐỔI</button>
-                    </div>
-                </form>
+        <div class="modal-dialog modal-dialog-centered px-3">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+                <div class="modal-body p-4">
+                    <h5 class="fw-800 mb-4 text-center text-success text-uppercase">Cập nhật thông tin</h5>
+                    <form id="updateLeadForm">
+                        <input type="hidden" id="editKey">
+                        <div class="mb-3"><label class="small fw-700 mb-1">HỌ TÊN</label><input type="text" id="editName" class="form-control input-mobile" required></div>
+                        <div class="mb-3"><label class="small fw-700 mb-1">SỐ ĐIỆN THOẠI</label><input type="tel" id="editPhone" class="form-control input-mobile" required></div>
+                        <div class="mb-3">
+                            <label class="small fw-700 mb-1">DỰ ÁN</label>
+                            <select id="editProject" class="form-select input-mobile">
+                                <option value="Công trình Nhà ở">Công trình Nhà ở</option>
+                                <option value="Dự án Villa/Resort">Dự án Villa / Resort</option>
+                                <option value="Cơ sở Kinh doanh">Cơ sở Kinh doanh</option>
+                                <option value="Khác">Khác...</option>
+                            </select>
+                        </div>
+                        <div class="mb-4"><label class="small fw-700 mb-1">GHI CHÚ</label><textarea id="editNote" class="form-control input-mobile" rows="2"></textarea></div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light w-100 py-3 rounded-pill fw-700" data-bs-dismiss="modal">HỦY</button>
+                            <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-800 shadow">LƯU THAY ĐỔI</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="./js/ctv.js?v=1.2"></script>
-    <!-- SERVICE WORKER -->
-<script>
-
-if ('serviceWorker' in navigator) {
-
-    window.addEventListener('load', async () => {
-
-        try {
-
-            const reg =
-                await navigator.serviceWorker.register('/sw.js');
-
-            console.log('SW OK:', reg.scope);
-
-        } catch (err) {
-
-            console.log('SW FAIL:', err);
-
-        }
-
-    });
-
-}
-
-</script>
-
 </body>
 </html>
