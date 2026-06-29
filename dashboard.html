@@ -325,19 +325,78 @@ font-weight:700;font-size:.75rem;
 
 <!-- CTV TAB[cite: 12] -->
 <div id="tab-ctv" class="tab-content d-none">
-    <div class="table-container shadow-sm border rounded-4 bg-white">
-        <table class="table table-hover mb-0">
-            <thead class="bg-light">
-                <tr>
-                    <th class="ps-4">CTV</th>
-                    <th>EMAIL</th>
-                    <th>SĐT</th>
-                    <th>KHU VỰC</th>
-                    <th>THÔNG TIN NGÂN HÀNG</th> <th class="text-end pe-4">THAO TÁC</th>
-                </tr>
-            </thead>
-            <tbody id="ctvTableBody"></tbody>
-        </table>
+    <div class="container-fluid py-2">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h5 class="fw-800 mb-0 text-success"><i class="bi bi-people-fill me-2"></i>QUẢN LÝ CỘNG TÁC VIÊN</h5>
+                <p class="text-muted small mb-0">Thêm mới, điều chỉnh thông tin hồ sơ và tài khoản đối tác</p>
+            </div>
+            <button class="btn btn-success rounded-pill px-4 fw-700 shadow-sm" onclick="window.openAddCTVModal()">
+                <i class="bi bi-person-plus-fill me-2"></i>THÊM CỘNG TÁC VIÊN
+            </button>
+        </div>
+
+        <div class="table-container shadow-sm border rounded-4 bg-white">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">CTV / ĐỐI TÁC</th>
+                        <th>EMAIL</th>
+                        <th>SĐT</th>
+                        <th>KHU VỰC</th>
+                        <th>THÔNG TIN NGÂN HÀNG</th>
+                        <th class="text-end pe-4">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody id="ctvTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ctvFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-800 m-0 text-success text-uppercase" id="ctvModalTitle">Thêm cộng tác viên mới</h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="ctvManageForm" onsubmit="window.saveCTVToFirebase(event)">
+                    <input type="hidden" id="manageCTVUid">
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-700">Họ và tên CTV</label>
+                        <input type="text" id="ctvFullName" class="form-control rounded-3 py-2" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-700">Địa chỉ Email</label>
+                        <input type="email" id="ctvEmail" class="form-control rounded-3 py-2" required>
+                    </div>
+                    <div class="mb-3" id="ctvPasswordGroup">
+                        <label class="form-label small fw-700">Mật khẩu khởi tạo</label>
+                        <input type="text" id="ctvPassword" class="form-control rounded-3 py-2" placeholder="Tối thiểu 6 ký tự">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-700">Số điện thoại</label>
+                        <input type="tel" id="ctvPhone" class="form-control rounded-3 py-2">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-700">Khu vực hoạt động</label>
+                        <input type="text" id="ctvArea" class="form-control rounded-3 py-2" placeholder="Ví dụ: Lâm Đồng">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-700">Thông tin ngân hàng (STK - Ngân hàng)</label>
+                        <input type="text" id="ctvBankInfo" class="form-control rounded-3 py-2" placeholder="Ví dụ: VCB - 111222333">
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light w-100 py-2.5 rounded-pill fw-700" data-bs-dismiss="modal">HỦY BỎ</button>
+                        <button type="submit" class="btn btn-success w-100 py-2.5 rounded-pill fw-800 shadow">XÁC NHẬN LƯU</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
