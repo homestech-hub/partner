@@ -160,6 +160,7 @@
     color:#047857;
     letter-spacing:.2px;
 }
+
 /* Màu sắc trạng thái cho từng bước xử lý trên Mobile */
 .step-badge {
     font-size: 0.65rem;
@@ -223,6 +224,17 @@
                     <div class="col-6 col-md-3"><div class="stat-card bg-white border shadow-sm"><p class="text-muted small mb-1">Đang xử lý</p><h4 class="statPending fw-800 m-0 text-warning">0</h4></div></div>
                     <div class="col-6 col-md-3"><div class="stat-card bg-white border shadow-sm"><p class="text-muted small mb-1">Đã chốt</p><h4 class="statSuccess fw-800 m-0 text-success">0</h4></div></div>
                 </div>
+                <div class="tab-pane fade show active" id="tab-leads" role="tabpanel">
+    <div class="mb-3">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 14px 0 0 14px;"><i class="bi bi-search"></i></span>
+            <input type="text" id="searchCTVLeads" class="form-control input-mobile border-start-0 ps-0 shadow-none fw-600" 
+                   placeholder="Tìm tên, SĐT, dự án của khách..." style="border-radius: 0 14px 14px 0;">
+        </div>
+    </div>
+
+    <div id="customerStatusList"></div>
+</div>
                 <div id="customerStatusList"></div>
             </div>
 
@@ -270,6 +282,9 @@
     <button class="nav-item-binh" data-bs-target="#tab-done" type="button">
         <i class="bi bi-wallet2"></i><span>Lịch sử</span>
     </button>
+    <button class="nav-item-binh" data-bs-target="#tab-ctv-reports" type="button">
+        <i class="bi bi-bar-chart-line-fill"></i><span>Báo cáo</span>
+    </button>
     
     <a href="chinhsach.html" class="nav-item-binh">
         <i class="bi bi-shield-check"></i><span>Chính sách</span>
@@ -302,7 +317,37 @@
             </div>
         </div>
     </div>
+    <div class="tab-pane fade" id="tab-ctv-reports" role="tabpanel">
+    <div class="item-card border-0 shadow-sm mb-3 bg-white">
+        <h6 class="fw-800 text-success text-uppercase small mb-3"><i class="bi bi-pie-chart-fill me-2"></i>Tổng quan thu nhập</h6>
+        <div class="row g-2 text-center">
+            <div class="col-4">
+                <div class="p-2 bg-light rounded-3">
+                    <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Tháng này</div>
+                    <b id="repMonth" class="text-dark small" style="font-size: 0.85rem;">0đ</b>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="p-2 bg-light rounded-3">
+                    <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Quý này</div>
+                    <b id="repQuarter" class="text-primary small" style="font-size: 0.85rem;">0đ</b>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="p-2 bg-light rounded-3">
+                    <div class="text-muted italic mb-1" style="font-size: 0.65rem;">Năm này</div>
+                    <b id="repYear" class="text-success small" style="font-size: 0.85rem;">0đ</b>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="item-card border-0 shadow-sm bg-white">
+        <h6 class="fw-800 text-dark text-uppercase small mb-3"><i class="bi bi-calendar-range-fill me-2"></i>Chi tiết theo dòng thời gian</h6>
+        <div id="reportTimelineContainer" class="d-flex flex-column gap-2">
+            </div>
+    </div>
+</div>
     <div class="modal fade" id="leadDetailModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow-lg"><div class="modal-body p-4" id="leadDetailBody"></div></div></div></div>
     <div class="modal fade" id="addModal" tabindex="-1"><div class="modal-dialog modal-fullscreen-sm-down modal-dialog-centered"><div class="modal-content border-0 shadow-lg"><div class="modal-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-4"><h4 class="fw-800 m-0 text-success text-uppercase" style="font-size: 1.1rem;">Thông tin dự án</h4><button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button></div>
