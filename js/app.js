@@ -113,6 +113,13 @@ window.applyFilters = () => {
         </td>
         <td><span class="ctv-tag">${ctvName}</span></td>
         <td class="small fw-700 text-primary">${l.project || "N/A"}</td>
+        
+        <td>
+            <div class="small fw-600 text-muted text-truncate" style="max-width: 180px;" title="${l.address || 'N/A'}">
+                ${l.address || "N/A"}
+            </div>
+        </td>
+        
         <td><span class="step-pill step-${step}">${labels[step]}</span></td>
         <td class="fw-700">${parseInt(l.commission || 0).toLocaleString()}đ</td>
         
@@ -121,7 +128,7 @@ window.applyFilters = () => {
                 <button class="btn btn-success btn-sm" onclick="window.openUpdateModal('${key}', ${step}, ${l.commission || 0})">
                     <i class="bi bi-arrow-repeat"></i>
                 </button>
-                <button class="btn btn-primary btn-sm" onclick="window.openEditLeadModal('${key}', '${l.name}', '${l.phone}', '${l.project}')">
+                <button class="btn btn-primary btn-sm" onclick="window.openEditLeadModal('${key}', '${l.name || "N/A"}', '${l.phone || ""}', '${l.project || "N/A"}', \`${(l.address || "").replace(/`/g, '\\`').replace(/\n/g, ' ')}\`)">
                     <i class="bi bi-pencil-square"></i>
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="window.deleteLead('${key}')">
@@ -551,7 +558,6 @@ window.renderTopCTV = () => {
 
     container.innerHTML = html || '<p class="text-center py-4 text-muted small">Chưa có dữ liệu doanh số từ CTV</p>';
 };
-
 // =========================
 // LOGIC MÁY TÍNH HOA HỒNG
 // =========================
@@ -888,16 +894,22 @@ window.deleteLead = (key) => {
     }
 };
 
-window.openEditLeadModal = (key, name, phone, project) => {
-    document.getElementById("newLeadName").value = name; //
-    document.getElementById("newLeadPhone").value = phone; //
-    document.getElementById("newLeadProject").value = project; //
+window.openEditLeadModal = (key, name, phone, project, address) => {
+    // 1. Gán dữ liệu cũ vào các ô Input
+    document.getElementById("newLeadName").value = name;
+    document.getElementById("newLeadPhone").value = phone;
+    document.getElementById("newLeadProject").value = project;
     
-    document.getElementById("addLeadForm").dataset.editId = key; //
-    document.querySelector("#addLeadModal h5").innerText = "CHỈNH SỬA HỒ SƠ"; //
+    // Nếu sau này Form "addLeadModal" của bạn bổ sung thêm ô nhập địa chỉ, nó sẽ tự điền vào:
+    const addrInput = document.getElementById("newLeadAddress");
+    if (addrInput) addrInput.value = address || "";
+
+    // Lưu lại ID của khách hàng đang sửa vào Dataset của Form
+    document.getElementById("addLeadForm").dataset.editId = key;
     
-    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('addLeadModal')); //
-    modal.show(); //
+    // Mở Modal
+    const modalEl = document.getElementById('addLeadModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
 };
 
 // =========================================================================
