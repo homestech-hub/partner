@@ -809,6 +809,10 @@ font-weight:700;font-size:.75rem;
                         <input type="tel" id="newLeadPhone" class="form-control rounded-3" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label small fw-700">Địa chỉ / Vị trí công trình</label>
+                        <input type="text" id="newLeadAddress" class="form-control rounded-3" placeholder="Ví dụ: 12 Hùng Vương, Đà Lạt" required>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label small fw-700">Dự án</label>
                         <select id="newLeadProject" class="form-select rounded-3">
                             <option value="Công trình Nhà ở">Công trình Nhà ở</option>
@@ -817,9 +821,10 @@ font-weight:700;font-size:.75rem;
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-700">Nguồn/CTV (ID hoặc Tên)</label>
-                        <input type="text" id="newLeadSource" class="form-control rounded-3" placeholder="Admin">
-                    </div>
+    <label class="form-label small fw-700">Nguồn/CTV (Chọn Đối tác được tính hoa hồng) ⭐</label>
+    <select id="newLeadSource" class="form-select rounded-3">
+        </select>
+</div>
                     <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-800 mt-3">LƯU HỒ SƠ</button>
                 </form>
             </div>
