@@ -81,8 +81,9 @@ function loadData(uid) {
     const listContainer = document.getElementById("customerStatusList");
     if (listContainer) listContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div></div>';
 
-    // Đọc từ khóa tìm kiếm
-    const searchKeyword = (document.getElementById("searchCTVLeads")?.value || "").toLowerCase().trim();
+    // 🌟 SỬA DÒNG NÀY: Kiểm tra kỹ nếu phần tử tồn tại thì mới lấy value, không thì mặc định là chuỗi rỗng ""
+    const searchInput = document.getElementById("searchCTVLeads");
+    const searchKeyword = searchInput ? searchInput.value.toLowerCase().trim() : "";
 
     onValue(query(ref(db, "COMPANIES/homestech/leads"), orderByChild("sourceCTV"), equalTo(uid)), snap => {
         const data = snap.val() || {};
@@ -93,9 +94,7 @@ function loadData(uid) {
         let leadHtml = "";
         const items = Object.entries(data).reverse();
 
-        const statusLabels = ["", "Mới tiếp nhận", "Đang khảo sát", "Đã báo giá", "Đã chốt đơn", "Hủy bỏ"];
-
-        // Mảng lưu dữ liệu phục vụ riêng cho tab Báo cáo
+        const statusLabels = ["", "Mới tiếp nhận", "Đang khảo sát", "Đã báo giá", "Đã chốt đơn", "Không chốt được khách"];
         const rawLeadsForReport = [];
 
         items.forEach(([key, item]) => {
@@ -104,7 +103,7 @@ function loadData(uid) {
             const phoneMatch = (item.phone || "").includes(searchKeyword);
             const projectMatch = (item.project || "").toLowerCase().includes(searchKeyword);
 
-            // Nếu không khớp từ khóa tìm kiếm thì bỏ qua hàng này
+            // Nếu có từ khóa tìm kiếm mà không khớp bất cứ trường nào thì bỏ qua
             if (searchKeyword && !nameMatch && !phoneMatch && !projectMatch) return;
 
             stats.total++;
@@ -116,7 +115,6 @@ function loadData(uid) {
             } else if (step >= 4) {
                 stats.success++;
                 totalCommission += commission;
-                // Chỉ gom các đơn chốt thành công vào tính toán báo cáo
                 rawLeadsForReport.push(item);
             }
 
@@ -176,7 +174,6 @@ function loadData(uid) {
         
         if (listContainer) listContainer.innerHTML = leadHtml || '<p class="text-center py-5 opacity-50">Không tìm thấy khách hàng phù hợp</p>';
         
-        // 🌟 TỰ ĐỘNG CHẠY BÁO CÁO KHI CÓ DỮ LIỆU MỚI 🌟
         calculateCTVReports(rawLeadsForReport);
     });
 }
@@ -363,37 +360,43 @@ onAuthStateChanged(auth, async (user) => {
 // --- XỬ LÝ CHUYỂN TAB AN TOÀN ---
 document.querySelectorAll('.nav-item-binh').forEach(item => {
     item.onclick = function(e) {
-        // Nếu là thẻ <a> (Chính sách) thì để trình duyệt tự chuyển trang
-        if (this.tagName.toLowerCase() === 'a') return;
+        if (this.tagName.toLowerCase() === 'a') return; //[cite: 4]
         
         e.preventDefault();
 
-        // 1. Lấy ID mục tiêu
-        const targetSelector = this.getAttribute('data-bs-target');
-        if (!targetSelector) return;
+        const targetSelector = this.getAttribute('data-bs-target'); //[cite: 4]
+        if (!targetSelector) return; //[cite: 4]
 
-        // 2. Cập nhật UI Menu
-        document.querySelectorAll('.nav-item-binh').forEach(nav => nav.classList.remove('active'));
-        this.classList.add('active');
+        document.querySelectorAll('.nav-item-binh').forEach(nav => nav.classList.remove('active')); //[cite: 4]
+        this.classList.add('active'); //[cite: 4]
 
-        // 3. Cập nhật UI Nội dung Tab
         document.querySelectorAll('.tab-pane').forEach(pane => {
-            pane.classList.remove('show', 'active');
+            pane.classList.remove('show', 'active'); //[cite: 4]
         });
 
-        const targetPane = document.querySelector(targetSelector);
+        const targetPane = document.querySelector(targetSelector); //[cite: 4]
         if (targetPane) {
-            targetPane.classList.add('show', 'active');
+            targetPane.classList.add('show', 'active'); //[cite: 4]
         }
 
-        // 4. Kích hoạt nạp dữ liệu dựa trên Tab
+        // TỰ ĐỘNG NẠP LẠI DỮ LIỆU AN TOÀN
         const user = auth.currentUser;
         if (user) {
             const targetId = targetSelector.replace('#', '');
+            
             if (targetId === "tab-done") {
-                loadPayoutHistory(user.uid); // Nạp lịch sử khi nhấn Tab Lịch sử
-            } else if (targetId === "tab-leads") {
-                loadData(user.uid); // Nạp khách hàng khi quay lại Tab Khách hàng
+                loadPayoutHistory(user.uid); //[cite: 4]
+            } 
+            else if (targetId === "tab-leads") {
+                // 🌟 FIX LỖI TRẮNG TRANG: Đảm bảo ô tìm kiếm được reset hoặc nhận diện đúng chuỗi rỗng
+                const searchInput = document.getElementById("searchCTVLeads");
+                if (searchInput) {
+                    searchInput.value = ""; // Xóa bộ lọc cũ để tránh bị nghẽn danh sách khi đổi tab
+                }
+                loadData(user.uid); // Gọi nạp lại danh sách khách hàng[cite: 4]
+            } 
+            else if (targetId === "tab-ctv-reports") {
+                loadData(user.uid); // Nạp dữ liệu mới nhất để chạy báo cáo
             }
         }
     };
