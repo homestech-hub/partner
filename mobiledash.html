@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Homestech Admin | Mobile CRM</title>
+    <meta name="theme-color" content="#059669">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #059669; --bg-body: #f8fafc; --surface: #ffffff; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); padding-bottom: 90px; color: #1e293b; }
+        
+        /* HEADER MOBILE */
+        .mobile-header { background: #ffffff; padding: 14px 16px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .mobile-header .brand { font-weight: 800; font-size: 1.1rem; color: #0f172a; }
+        
+        /* CARD TRẠNG THÁI */
+        .m-stat-card { background: #fff; border-radius: 16px; padding: 12px; border: 1px solid #f1f5f9; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.01); }
+        .m-stat-card.bg-money { background: linear-gradient(135deg, #065f46 0%, #059669 100%); color: white; }
+        .m-stat-card h5 { font-size: 1.2rem; font-weight: 800; margin: 0; }
+        .m-stat-card p { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; opacity: 0.8; }
+        
+        /* ITEM LIST CARD */
+        .m-item-card { background: var(--surface); border-radius: 16px; border: 1px solid #f1f5f9; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .ctv-badge { background: #ecfdf5; color: var(--primary); padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.65rem; }
+        
+        /* BOTTOM NAV BAR */
+        .m-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: #ffffff; border-top: 1px solid #e2e8f0; z-index: 2000; display: flex; }
+        .m-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; background: none; border: none; padding: 0; text-decoration: none; transition: 0.2s; }
+        .m-nav-btn i { font-size: 1.3rem; margin-bottom: 2px; }
+        .m-nav-btn span { font-size: 0.65rem; font-weight: 700; }
+        .m-nav-btn.active { color: var(--primary); }
+        
+        .input-m { padding: 12px 14px; border-radius: 12px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 600; }
+        .step-pill { font-size: 0.65rem; padding: 4px 10px; border-radius: 50px; font-weight: 700; }
+        .step-1 { background: #f1f5f9; color: #64748b; }
+        .step-2 { background: #fef9c3; color: #a16207; }
+        .step-3 { background: #e0f2fe; color: #0369a1; }
+        .step-4 { background: #dcfce7; color: #15803d; }
+        .step-5 { background: #fee2e2; color: #b91c1c; }
+        
+        .quote-badge { font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; }
+        .q-da_gui { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+        .q-sua { background: #fef3c7; color: #d97706; }
+        .q-da_chot { background: #dcfce7; color: #15803d; }
+        .q-khong_chot { background: #fee2e2; color: #b91c1c; }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <div class="brand">HOMESTECH <span class="text-success">CRM</span></div>
+        <button class="btn btn-sm btn-light border rounded-circle" onclick="logout()" style="width: 38px; height: 38px;">
+            <i class="bi bi-box-arrow-right text-danger"></i>
+        </button>
+    </div>
+
+    <div class="container-fluid px-3 pt-3">
+        <div class="tab-content" id="mobileTabContent">
+            
+            <div class="tab-pane fade show active" id="m-tab-dashboard" role="tabpanel">
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><div class="m-stat-card bg-money"><p>Tổng Hoa Hồng</p><h5 id="m-statTotalMoney">0đ</h5></div></div>
+                    <div class="col-6"><div class="m-stat-card"><p>Tổng Khách</p><h5 id="m-statTotalLeads" class="text-dark">0</h5></div></div>
+                    <div class="col-6"><div class="m-stat-card"><p>Đang Xử Lý</p><h5 id="m-statPendingLeads" class="text-warning">0</h5></div></div>
+                    <div class="col-6"><div class="m-stat-card"><p>Đã Chốt đơn</p><h5 id="m-statDoneLeads" class="text-success">0</h5></div></div>
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" id="m-searchName" class="form-control input-m mb-2" placeholder="Tìm tên khách hàng hoặc SĐT...">
+                    <select id="m-filterCTV" class="form-select input-m"></select>
+                </div>
+
+                <div id="m-leadListContainer"></div>
+            </div>
+
+            <div class="tab-pane fade" id="m-tab-quotes" role="tabpanel">
+                <div id="m-quoteListView">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-800 text-success m-0"><i class="bi bi-file-earmark-spreadsheet-fill me-2"></i>DANH SÁCH BÁO GIÁ</h6>
+                        <button class="btn btn-success btn-sm rounded-pill px-3 fw-700" onclick="toggleMQuoteForm(true)">+ TẠO MỚI</button>
+                    </div>
+                    
+                    <input type="text" id="m-searchQuote" class="form-control input-m mb-3" placeholder="Tìm tên khách hàng báo giá...">
+                    <div id="m-quoteListContainer"></div>
+                </div>
+
+                <div id="m-quoteFormView" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <h6 class="fw-800 text-primary m-0" id="m-quoteFormTitle">Tạo báo giá mới</h6>
+                        <button class="btn-close" onclick="toggleMQuoteForm(false)"></button>
+                    </div>
+                    <form id="m-mainQuoteForm" onsubmit="saveMQuoteToFirebase(event)">
+                        <input type="hidden" id="m-editQuoteId">
+                        
+                        <div class="mb-2">
+                            <label class="small fw-700 text-muted mb-1">KHÁCH HÀNG ÁP DỤNG</label>
+                            <select id="m-quoteLeadSelect" class="form-select input-m" required></select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="small fw-700 text-muted mb-1">TRẠNG THÁI</label>
+                            <select id="m-quoteStatusSelect" class="form-select input-m">
+                                <option value="da_gui">Đã gửi khách</option>
+                                <option value="sua_1">Sửa lần 1</option>
+                                <option value="sua_2">Sửa lần 2</option>
+                                <option value="sua_3">Sửa lần 3</option>
+                                <option value="da_chot">Đã chốt báo giá ✔</option>
+                                <option value="khong_chot">Khách không chốt ✖</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="small fw-700 text-muted mb-1">TỔNG TIỀN BÁO GIÁ (VNĐ)</label>
+                            <input type="number" id="m-quoteTotalAmount" class="form-control input-m" required oninput="calculateMQuoteProfit()">
+                        </div>
+                        <div class="mb-2">
+                            <label class="small fw-700 text-muted mb-1">GIÁ VỐN / CHI PHÍ (VNĐ)</label>
+                            <input type="number" id="m-quoteCostAmount" class="form-control input-m" required oninput="calculateMQuoteProfit()">
+                        </div>
+                        <div class="mb-2">
+                            <label class="small fw-700 text-muted mb-1">HOA HỒNG CTV ĐỊNH CHI (VNĐ)</label>
+                            <input type="number" id="m-quoteCommissionAmount" class="form-control input-m" required oninput="calculateMQuoteProfit()">
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-700 text-muted mb-1">LINK FILE ĐÍNH KÈM (DRIVE)</label>
+                            <input type="url" id="m-quoteLinkAttachment" class="form-control input-m" placeholder="https://drive.google.com/...">
+                        </div>
+                        
+                        <div class="p-3 bg-light rounded-3 mb-3 text-center border">
+                            <span class="small text-muted fw-600 d-block mb-1">LỢI NHUẬN RÒNG DỰ KIẾN</span>
+                            <div id="m-quoteProfitDisplay" class="fw-800 text-success fs-5">0đ (0%)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small fw-700 text-muted mb-1">GHI CHÚ PHIÊN BẢN</label>
+                            <textarea id="m-quoteNote" class="form-control input-m" rows="2"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-3 rounded-3 fw-800 shadow">XÁC NHẬN LƯU BÁO GIÁ</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="m-tab-ctv" role="tabpanel">
+                <h6 class="fw-800 text-dark mb-3"><i class="bi bi-people-fill me-2"></i>DANH SÁCH ĐỐI TÁC CTV</h6>
+                <div id="m-ctvListContainer"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="m-updateStatusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered px-3">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-800">Cập nhật tiến độ khách</h6>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <input type="hidden" id="m-currentLeadId">
+                    <div class="mb-3">
+                        <label class="small fw-700 text-muted mb-1">TRẠNG THÁI PHỄU</label>
+                        <select id="m-statusSelect" class="form-select input-m">
+                            <option value="1">Mới tiếp nhận</option>
+                            <option value="2">Đang khảo sát</option>
+                            <option value="3">Đã báo giá</option>
+                            <option value="4">Đã chốt đơn</option>
+                            <option value="5">Tất toán hệ thống</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-700 text-muted mb-1">HOA HỒNG CTV (VNĐ)</label>
+                        <input id="m-commissionValue" class="form-control input-m" type="number">
+                    </div>
+                    <button class="btn btn-success w-100 py-2.5 rounded-3 fw-700" onclick="confirmMUpdate()">XÁC NHẬN CẬP NHẬT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="m-bottom-nav">
+        <button class="m-nav-btn active" data-tab="m-tab-dashboard">
+            <i class="bi bi-person-lines-fill"></i><span>Khách hàng</span>
+        </button>
+        <button class="m-nav-btn" data-tab="m-tab-quotes">
+            <i class="bi bi-file-earmark-spreadsheet-fill"></i><span>Báo giá CRM</span>
+        </button>
+        <button class="m-nav-btn" data-tab="m-tab-ctv">
+            <i class="bi bi-people-fill"></i><span>Đối tác CTV</span>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="./js/mobileapp.js"></script>
+    
+    <script>
+        document.querySelectorAll('.m-nav-btn').forEach(btn => {
+            btn.onclick = function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.m-nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const targetId = this.dataset.tab;
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+                
+                const targetPane = document.getElementById(targetId);
+                if(targetPane) targetPane.classList.add('show', 'active');
+            }
+        });
+    </script>
+</body>
+</html>
