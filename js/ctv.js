@@ -76,6 +76,7 @@ if (leadForm) {
 }
 
 // --- 4. LOAD DANH SÁCH KHÁCH HÀNG ---
+// --- 4. LOAD DANH SÁCH KHÁCH HÀNG (CẬP NHẬT TRẠNG THÁI & LÀM MỜ) ---
 function loadData(uid) {
     const listContainer = document.getElementById("customerStatusList");
     if (listContainer) listContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div></div>';
@@ -88,6 +89,9 @@ function loadData(uid) {
         let stats = { total: 0, pending: 0, success: 0 };
         let leadHtml = "";
         const items = Object.entries(data).reverse();
+
+        // Mảng định nghĩa tên hiển thị tương ứng với từng step của Admin
+        const statusLabels = ["", "Mới tiếp nhận", "Đang khảo sát", "Đã báo giá", "Đã chốt đơn", "Hủy bỏ"];
 
         items.forEach(([key, item]) => {
             stats.total++;
@@ -109,15 +113,17 @@ function loadData(uid) {
 
             const dateCreated = item.dateDisplay || new Date(item.createdAt).toLocaleDateString('vi-VN');
 
-            // --- SỬA LỖI LINK VỊ TRÍ TẠI ĐÂY ---
-            // Kiểm tra nếu address không tồn tại hoặc là số 0 thì dùng mặc định là Dalat
+            // Chuẩn hóa link vị trí bản đồ
             const validAddress = (item.address && item.address !== "0" && item.address !== "undefined") 
                                  ? item.address 
                                  : "Dalat";
-            const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(validAddress)}`;
+            const mapLink = `http://maps.google.com/?q=${encodeURIComponent(validAddress)}`;
+
+            // THAY ĐỔI: Nếu xử lý xong (step >= 4) thì thêm class "lead-archived" để làm mờ
+            const archiveClass = (step >= 4) ? "lead-archived" : "";
 
             leadHtml += `
-                <div class="item-card shadow-sm border-0">
+                <div class="item-card shadow-sm ${archiveClass}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
                             <h6 class="fw-800 m-0 text-dark text-uppercase">${item.name}</h6>
@@ -128,21 +134,10 @@ function loadData(uid) {
                                 <i class="bi bi-telephone-fill me-1"></i>${item.phone}
                             </div>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-link text-muted p-0 shadow-none" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots-vertical fs-5"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 p-2">
-                                <li><a class="dropdown-item small fw-700 py-2" href="javascript:void(0)" 
-                                    onclick="openEditLead('${key}', '${item.name}', '${item.phone}', '${item.project}', \`${item.note || ''}\`)">
-                                    <i class="bi bi-pencil me-2 text-success"></i>CHỈNH SỬA</a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item small fw-700 py-2 text-danger" href="javascript:void(0)" onclick="deleteLead('${key}')">
-                                    <i class="bi bi-trash me-2"></i>XÓA HỒ SƠ</a>
-                                </li>
-                            </ul>
-                        </div>
+                        
+                        <span class="step-badge step-${step}">
+                            ${statusLabels[step] || "Đang xử lý"}
+                        </span>
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
@@ -150,6 +145,21 @@ function loadData(uid) {
                             <i class="bi bi-briefcase me-1"></i>${item.project || 'Dự án'}
                         </div>
                         <div class="d-flex gap-2">
+                            <div class="dropdown d-inline-block">
+                                <button class="btn btn-light btn-sm rounded-pill px-2 border" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 p-2">
+                                    <li><a class="dropdown-item small fw-700 py-2" href="javascript:void(0)" 
+                                        onclick="openEditLead('${key}', '${item.name}', '${item.phone}', '${item.project}', \`${item.note || ''}\`)">
+                                        <i class="bi bi-pencil me-2 text-success"></i>CHỈNH SỬA</a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item small fw-700 py-2 text-danger" href="javascript:void(0)" onclick="deleteLead('${key}')">
+                                        <i class="bi bi-trash me-2"></i>XÓA HỒ SƠ</a>
+                                    </li>
+                                </ul>
+                            </div>
                             <a href="${mapLink}" 
                                target="_blank" class="btn btn-light btn-sm rounded-pill px-3 border fw-700">VỊ TRÍ</a>
                             <button class="btn btn-success btn-sm rounded-pill px-3 fw-700 shadow-sm" onclick="viewLeadDetail('${key}')">CHI TIẾT</button>
