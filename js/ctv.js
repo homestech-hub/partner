@@ -81,6 +81,9 @@ function loadData(uid) {
     const listContainer = document.getElementById("customerStatusList");
     if (listContainer) listContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div></div>';
 
+    // Đọc từ khóa tìm kiếm
+    const searchKeyword = (document.getElementById("searchCTVLeads")?.value || "").toLowerCase().trim();
+
     onValue(query(ref(db, "COMPANIES/homestech/leads"), orderByChild("sourceCTV"), equalTo(uid)), snap => {
         const data = snap.val() || {};
         
@@ -90,10 +93,20 @@ function loadData(uid) {
         let leadHtml = "";
         const items = Object.entries(data).reverse();
 
-        // Mảng định nghĩa tên hiển thị tương ứng với từng step của Admin
         const statusLabels = ["", "Mới tiếp nhận", "Đang khảo sát", "Đã báo giá", "Đã chốt đơn", "Hủy bỏ"];
 
+        // Mảng lưu dữ liệu phục vụ riêng cho tab Báo cáo
+        const rawLeadsForReport = [];
+
         items.forEach(([key, item]) => {
+            // Chuyển chữ về viết thường để so sánh đa năng
+            const nameMatch = (item.name || "").toLowerCase().includes(searchKeyword);
+            const phoneMatch = (item.phone || "").includes(searchKeyword);
+            const projectMatch = (item.project || "").toLowerCase().includes(searchKeyword);
+
+            // Nếu không khớp từ khóa tìm kiếm thì bỏ qua hàng này
+            if (searchKeyword && !nameMatch && !phoneMatch && !projectMatch) return;
+
             stats.total++;
             const step = parseInt(item.step) || 1;
             const commission = parseInt(item.commission) || 0;
@@ -103,6 +116,8 @@ function loadData(uid) {
             } else if (step >= 4) {
                 stats.success++;
                 totalCommission += commission;
+                // Chỉ gom các đơn chốt thành công vào tính toán báo cáo
+                rawLeadsForReport.push(item);
             }
 
             if (item.payments) {
@@ -112,14 +127,8 @@ function loadData(uid) {
             }
 
             const dateCreated = item.dateDisplay || new Date(item.createdAt).toLocaleDateString('vi-VN');
-
-            // Chuẩn hóa link vị trí bản đồ
-            const validAddress = (item.address && item.address !== "0" && item.address !== "undefined") 
-                                 ? item.address 
-                                 : "Dalat";
+            const validAddress = (item.address && item.address !== "0" && item.address !== "undefined") ? item.address : "Dalat";
             const mapLink = `http://maps.google.com/?q=${encodeURIComponent(validAddress)}`;
-
-            // THAY ĐỔI: Nếu xử lý xong (step >= 4) thì thêm class "lead-archived" để làm mờ
             const archiveClass = (step >= 4) ? "lead-archived" : "";
 
             leadHtml += `
@@ -134,34 +143,25 @@ function loadData(uid) {
                                 <i class="bi bi-telephone-fill me-1"></i>${item.phone}
                             </div>
                         </div>
-                        
-                        <span class="step-badge step-${step}">
-                            ${statusLabels[step] || "Đang xử lý"}
-                        </span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                        <div class="small text-muted fw-600">
-                            <i class="bi bi-briefcase me-1"></i>${item.project || 'Dự án'}
+                        <div class="text-end">
+                            <span class="step-badge step-${step} d-inline-block mb-2">${statusLabels[step] || "Đang xử lý"}</span>
+                            <div class="small fw-800 ${commission > 0 ? 'text-success' : 'text-muted'}" style="font-size: 0.85rem;">
+                                ${commission > 0 ? '+' + commission.toLocaleString('vi-VN') + 'đ' : '0đ'}
+                            </div>
                         </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <div class="small text-muted fw-600"><i class="bi bi-briefcase me-1"></i>${item.project || 'Dự án'}</div>
                         <div class="d-flex gap-2">
                             <div class="dropdown d-inline-block">
-                                <button class="btn btn-light btn-sm rounded-pill px-2 border" data-bs-toggle="dropdown">
-                                    <i class="bi bi-three-dots"></i>
-                                </button>
+                                <button class="btn btn-light btn-sm rounded-pill px-2 border" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 p-2">
-                                    <li><a class="dropdown-item small fw-700 py-2" href="javascript:void(0)" 
-                                        onclick="openEditLead('${key}', '${item.name}', '${item.phone}', '${item.project}', \`${item.note || ''}\`)">
-                                        <i class="bi bi-pencil me-2 text-success"></i>CHỈNH SỬA</a>
-                                    </li>
+                                    <li><a class="dropdown-item small fw-700 py-2" href="javascript:void(0)" onclick="openEditLead('${key}', '${item.name}', '${item.phone}', '${item.project}', \`${item.note || ''}\`)"><i class="bi bi-pencil me-2 text-success"></i>CHỈNH SỬA</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item small fw-700 py-2 text-danger" href="javascript:void(0)" onclick="deleteLead('${key}')">
-                                        <i class="bi bi-trash me-2"></i>XÓA HỒ SƠ</a>
-                                    </li>
+                                    <li><a class="dropdown-item small fw-700 py-2 text-danger" href="javascript:void(0)" onclick="deleteLead('${key}')"><i class="bi bi-trash me-2"></i>XÓA HỒ SƠ</a></li>
                                 </ul>
                             </div>
-                            <a href="${mapLink}" 
-                               target="_blank" class="btn btn-light btn-sm rounded-pill px-3 border fw-700">VỊ TRÍ</a>
+                            <a href="${mapLink}" target="_blank" class="btn btn-light btn-sm rounded-pill px-3 border fw-700">VỊ TRÍ</a>
                             <button class="btn btn-success btn-sm rounded-pill px-3 fw-700 shadow-sm" onclick="viewLeadDetail('${key}')">CHI TIẾT</button>
                         </div>
                     </div>
@@ -169,17 +169,28 @@ function loadData(uid) {
         });
 
         const currentBalance = totalCommission - totalPaid;
-        const displayBalance = Math.max(0, currentBalance);
-        const moneyFormatted = displayBalance.toLocaleString('vi-VN') + 'đ';
-        
-        document.querySelectorAll(".statTotalMoney").forEach(el => el.innerText = moneyFormatted);
+        document.querySelectorAll(".statTotalMoney").forEach(el => el.innerText = Math.max(0, currentBalance).toLocaleString('vi-VN') + 'đ');
         document.querySelectorAll(".statTotalLeads").forEach(el => el.innerText = stats.total);
         document.querySelectorAll(".statPending").forEach(el => el.innerText = stats.pending);
         document.querySelectorAll(".statSuccess").forEach(el => el.innerText = stats.success);
         
-        if (listContainer) listContainer.innerHTML = leadHtml || '<p class="text-center py-5 opacity-50">Chưa có khách hàng</p>';
+        if (listContainer) listContainer.innerHTML = leadHtml || '<p class="text-center py-5 opacity-50">Không tìm thấy khách hàng phù hợp</p>';
+        
+        // 🌟 TỰ ĐỘNG CHẠY BÁO CÁO KHI CÓ DỮ LIỆU MỚI 🌟
+        calculateCTVReports(rawLeadsForReport);
     });
 }
+
+// Ràng buộc sự kiện gõ phím tìm kiếm thời gian thực
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("searchCTVLeads");
+    if (searchInput) {
+        searchInput.addEventListener("input", () => {
+            const user = auth.currentUser;
+            if (user) loadData(user.uid); // Gọi lại hàm load dữ liệu kèm bộ lọc
+        });
+    }
+});
 // --- 5. LOAD LỊCH SỬ THƯỞNG (TẤT TOÁN) ---
 // --- 5. LOAD LỊCH SỬ THƯỞNG (QUÉT TỪ PAYMENTS TRONG LEADS) ---
 function loadPayoutHistory(uid) {
@@ -469,4 +480,58 @@ window.showNotifications = () => {
 function triggerNotification() {
     const badge = document.getElementById('notifBadge');
     if (badge) badge.style.display = 'block';
+}
+
+//
+// --- 9. HÀM TÍNH TOÁN BÁO CÁO THU NHẬP ĐA GIAI ĐOẠN ---
+function calculateCTVReports(successLeads) {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    const currentQuarter = Math.floor((now.getMonth() + 3) / 3);
+
+    let mTotal = 0;
+    let qTotal = 0;
+    let yTotal = 0;
+
+    // Khởi tạo mảng gom nhóm chi tiết theo từng tháng của năm nay
+    const monthlyBreakdown = Array(13).fill(0); 
+
+    successLeads.forEach(l => {
+        const d = new Date(l.updatedAt || l.createdAt);
+        const lMonth = d.getMonth() + 1;
+        const lYear = d.getFullYear();
+        const lQuarter = Math.floor((d.getMonth() + 3) / 3);
+        const comm = parseInt(l.commission || 0);
+
+        // Chỉ tính dữ liệu trong năm nay
+        if (lYear === currentYear) {
+            yTotal += comm;
+            monthlyBreakdown[lMonth] += comm; // Gom tiền vào tháng tương ứng
+
+            if (lQuarter === currentQuarter) qTotal += comm;
+            if (lMonth === currentMonth) mTotal += comm;
+        }
+    });
+
+    // Cập nhật 3 ô tổng quan
+    if(document.getElementById("repMonth")) document.getElementById("repMonth").innerText = mTotal.toLocaleString('vi-VN') + "đ";
+    if(document.getElementById("repQuarter")) document.getElementById("repQuarter").innerText = qTotal.toLocaleString('vi-VN') + "đ";
+    if(document.getElementById("repYear")) document.getElementById("repYear").innerText = yTotal.toLocaleString('vi-VN') + "đ";
+
+    // Tạo danh sách timeline chi tiết
+    let timelineHtml = "";
+    for (let m = 12; m >= 1; m--) {
+        if (monthlyBreakdown[m] > 0 || m <= currentMonth) {
+            const isCurrent = m === currentMonth ? '<span class="badge bg-success-subtle text-success ms-2" style="font-size:0.55rem">Tháng hiện tại</span>' : '';
+            timelineHtml += `
+                <div class="d-flex justify-content-between align-items-center p-2.5 bg-light rounded-3 mb-1">
+                    <div class="fw-700 small text-dark"><i class="bi bi-calendar-check me-2 text-muted"></i>Tháng ${m}/${currentYear} ${isCurrent}</div>
+                    <div class="fw-800 text-success" style="font-size:0.85rem;">+${monthlyBreakdown[m].toLocaleString('vi-VN')}đ</div>
+                </div>`;
+        }
+    }
+    
+    const container = document.getElementById("reportTimelineContainer");
+    if (container) container.innerHTML = timelineHtml;
 }
