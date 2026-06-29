@@ -103,7 +103,7 @@ window.applyFilters = () => {
             if (step >= 4) s.done++; //
             s.money += parseInt(l.commission || 0); //
 
-            const labels = ["", "Mới tiếp nhận", "Đang khảo sát", "Đã báo giá", "Đã chốt đơn", "Tất toán"]; //
+            const labels = ["", "Mới tiếp nhận", "Đang khảo sát", "Đã báo giá", "Đã chốt đơn", "Không chốt được ✖"]; //
 
             html += `
     <tr>
@@ -901,10 +901,10 @@ window.saveQuoteToFirebase = async function(event) {
         } 
         // Khi khách từ chối không chốt
         else if (status === "khong_chot") {
-            leadUpdateData.step = 1;
-            leadUpdateData.commission = 0;
-            leadUpdateData.contractValue = 0;        // Reset về 0
-        } 
+    leadUpdateData.step = 5;                 // Chuyển sang trạng thái Hủy bỏ / Không chốt được
+    leadUpdateData.commission = 0;           // Đưa hoa hồng về 0
+    leadUpdateData.contractValue = 0;        // Reset giá trị hợp đồng về 0
+}
         // Khi đang ở các bước gửi khách, sửa đổi 1, 2, 3...
         else {
             leadUpdateData.step = 3;                 // Trạng thái "Đã báo giá"
