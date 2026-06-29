@@ -74,19 +74,18 @@ font-weight:700;font-size:.75rem;
 @media(max-width:992px){
 .sidebar{display:none;}
 }
-/* */
+
 .table td {
-    vertical-align: middle !important; /* Căn giữa nội dung theo chiều dọc */
+    vertical-align: middle !important;
     padding-top: 15px !important;
     padding-bottom: 15px !important;
-    white-space: nowrap; /* Tránh việc nội dung xuống dòng làm lệch hàng */
+    white-space: nowrap;
 }
 
 .table-container {
-    overflow-x: auto; /* Cho phép cuộn ngang nếu bảng quá rộng thay vì làm méo hàng */
+    overflow-x: auto;
 }
 
-/* Đảm bảo các nút thao tác có kích thước cố định */
 .btn-group-sm > .btn, .btn-sm {
     padding: 0.25rem 0.5rem !important;
     line-height: 1.5 !important;
@@ -94,10 +93,6 @@ font-weight:700;font-size:.75rem;
     align-items: center;
     justify-content: center;
 }
-/* css khung Tính tổng menu tổng KH, Tổng Đã chốt */
-/* =========================
-MODERN STATS CARD
-========================= */
 
 .modern-stat-card{
     position:relative;
@@ -108,38 +103,27 @@ MODERN STATS CARD
     display:flex;
     align-items:center;
     gap:18px;
-
     border:1px solid #eef2f7;
-
     transition:.25s ease;
     min-height:130px;
-
-    box-shadow:
-    0 10px 30px rgba(15,23,42,.04);
+    box-shadow: 0 10px 30px rgba(15,23,42,.04);
 }
 
 .modern-stat-card:hover{
     transform:translateY(-4px);
-    box-shadow:
-    0 20px 40px rgba(15,23,42,.08);
+    box-shadow: 0 20px 40px rgba(15,23,42,.08);
 }
-
-/* ICON */
 
 .stat-icon{
     width:68px;
     height:68px;
     border-radius:20px;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     font-size:28px;
     flex-shrink:0;
 }
-
-/* INFO */
 
 .stat-info{
     flex:1;
@@ -168,8 +152,6 @@ MODERN STATS CARD
     font-weight:600;
 }
 
-/* COLORS */
-
 .stat-blue .stat-icon{
     background:#dbeafe;
     color:#2563eb;
@@ -190,8 +172,6 @@ MODERN STATS CARD
     color:#059669;
 }
 
-/* Glow */
-
 .modern-stat-card::after{
     content:"";
     position:absolute;
@@ -203,27 +183,21 @@ MODERN STATS CARD
     background:rgba(255,255,255,.4);
 }
 
-/* MOBILE */
-
 @media(max-width:768px){
-
-.modern-stat-card{
-    padding:18px;
-    border-radius:20px;
-    min-height:auto;
-}
-
-.stat-icon{
-    width:56px;
-    height:56px;
-    border-radius:16px;
-    font-size:22px;
-}
-
-.stat-value{
-    font-size:1.5rem;
-}
-
+    .modern-stat-card{
+        padding:18px;
+        border-radius:20px;
+        min-height:auto;
+    }
+    .stat-icon{
+        width:56px;
+        height:56px;
+        border-radius:16px;
+        font-size:22px;
+    }
+    .stat-value{
+        font-size:1.5rem;
+    }
 }
 </style>
 </head>
@@ -238,6 +212,7 @@ MODERN STATS CARD
 
 <ul class="nav flex-column nav-pills" id="adminTabs">
 <li class="nav-item"><a class="nav-link active" data-tab="tab-dashboard" href="#">Dashboard</a></li>
+<li class="nav-item"><a class="nav-link" data-tab="tab-quotes" href="#"><i class="bi bi-file-earmark-text-fill me-2"></i>Báo giá</a></li>
 <li class="nav-item"><a class="nav-link" data-tab="tab-reports" href="#">Báo cáo</a></li>
 <li class="nav-item"><a class="nav-link" data-tab="tab-calculator" href="#">Tính hoa hồng</a></li>
 <li class="nav-item"><a class="nav-link" data-tab="tab-payout" href="#">Lịch sử thanh toán</a></li>
@@ -254,9 +229,7 @@ MODERN STATS CARD
 <button class="border-0 bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center"
         style="width:44px;height:44px"
         onclick="logout()">
-
     <i class="bi bi-box-arrow-right text-danger fs-5"></i>
-
 </button>
 </div>
 
@@ -265,112 +238,58 @@ MODERN STATS CARD
 <!-- DASHBOARD -->
 <div id="tab-dashboard" class="tab-content">
 
-<!-- STATS -->
-<!-- STATS MODERN -->
 <div class="row g-4 mb-4">
-
-    <!-- TOTAL LEADS -->
     <div class="col-md-3">
         <div class="modern-stat-card stat-blue">
-            <div class="stat-icon">
-                <i class="bi bi-people-fill"></i>
-            </div>
-
+            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
             <div class="stat-info">
-                <div class="stat-label">
-                    Tổng khách hàng
-                </div>
-
-                <div class="stat-value" id="statTotalLeads">
-                    0
-                </div>
-
-                <div class="stat-sub">
-                    Hồ sơ trong hệ thống
-                </div>
+                <div class="stat-label">Tổng khách hàng</div>
+                <div class="stat-value" id="statTotalLeads">0</div>
+                <div class="stat-sub">Hồ sơ trong hệ thống</div>
             </div>
         </div>
     </div>
 
-    <!-- PROCESSING -->
     <div class="col-md-3">
         <div class="modern-stat-card stat-orange">
-            <div class="stat-icon">
-                <i class="bi bi-clock-history"></i>
-            </div>
-
+            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
             <div class="stat-info">
-                <div class="stat-label">
-                    Đang xử lý
-                </div>
-
-                <div class="stat-value" id="statPendingLeads">
-                    0
-                </div>
-
-                <div class="stat-sub">
-                    Hồ sơ đang theo dõi
-                </div>
+                <div class="stat-label">Đang xử lý</div>
+                <div class="stat-value" id="statPendingLeads">0</div>
+                <div class="stat-sub">Hồ sơ đang theo dõi</div>
             </div>
         </div>
     </div>
 
-    <!-- DONE -->
     <div class="col-md-3">
         <div class="modern-stat-card stat-green">
-            <div class="stat-icon">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
-
+            <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
             <div class="stat-info">
-                <div class="stat-label">
-                    Đã chốt đơn
-                </div>
-
-                <div class="stat-value" id="statDoneLeads">
-                    0
-                </div>
-
-                <div class="stat-sub">
-                    Hồ sơ hoàn tất
-                </div>
+                <div class="stat-label">Đã chốt đơn</div>
+                <div class="stat-value" id="statDoneLeads">0</div>
+                <div class="stat-sub">Hồ sơ hoàn tất</div>
             </div>
         </div>
     </div>
 
-    <!-- MONEY -->
     <div class="col-md-3">
         <div class="modern-stat-card stat-money">
-            <div class="stat-icon">
-                <i class="bi bi-cash-stack"></i>
-            </div>
-
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
             <div class="stat-info">
-                <div class="stat-label">
-                    Tổng hoa hồng
-                </div>
-
-                <div class="stat-value" id="statTotalMoney">
-                    0đ
-                </div>
-
-                <div class="stat-sub">
-                    Doanh thu hiện tại
-                </div>
+                <div class="stat-label">Tổng hoa hồng</div>
+                <div class="stat-value" id="statTotalMoney">0đ</div>
+                <div class="stat-sub">Doanh thu hiện tại</div>
             </div>
         </div>
     </div>
-
 </div>
 
-<!-- FILTER -->
 <div class="row g-3 mb-3">
 <div class="col-md-6">
 <div class="filter-box">
 <input id="searchName" class="filter-input" placeholder="Tìm khách...">
 </div>
 </div>
-
 <div class="col-md-6">
 <div class="filter-box">
 <select id="filterCTV" class="filter-input"></select>
@@ -403,6 +322,7 @@ MODERN STATS CARD
 
 </div>
 
+<!-- CTV TAB[cite: 12] -->
 <div id="tab-ctv" class="tab-content d-none">
     <div class="table-container shadow-sm border rounded-4 bg-white">
         <table class="table table-hover mb-0">
@@ -420,7 +340,7 @@ MODERN STATS CARD
     </div>
 </div>
 
-<!-- ACCOUNTS -->
+<!-- ACCOUNTS TAB[cite: 12] -->
 <div id="tab-accounts" class="tab-content d-none">
 <div class="table-container">
 <table class="table mb-0">
@@ -432,7 +352,7 @@ MODERN STATS CARD
 </div>
 </div>
 
-<!-- REPORT -->
+<!-- REPORT TAB[cite: 12] -->
 <div id="tab-reports" class="tab-content d-none">
     <div class="row g-4 p-4">
         <div class="col-md-8">
@@ -451,16 +371,16 @@ MODERN STATS CARD
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="table-container p-4 h-100">
                 <h6 class="fw-800 mb-4 text-primary small"><i class="bi bi-trophy-fill me-2"></i>TOP CỘNG TÁC VIÊN</h6>
-                <div id="topCTVList" class="d-flex flex-column gap-2">
-                    </div>
+                <div id="topCTVList" class="d-flex flex-column gap-2"></div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- CALCULATOR TAB[cite: 12] -->
 <div id="tab-calculator" class="tab-content d-none">
     <div class="container-fluid py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -476,8 +396,7 @@ MODERN STATS CARD
         <div id="calcListFilter" class="table-container p-3 mb-4 bg-white shadow-sm border-0">
             <div class="input-group">
                 <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                <input type="text" id="searchCalc" class="form-control border-start-0 ps-0 shadow-none fw-600" 
-                       placeholder="Tìm kiếm khách hàng hoặc số điện thoại..." oninput="renderCalcHistory()">
+                <input type="text" id="searchCalc" class="form-control border-start-0 ps-0 shadow-none fw-600" placeholder="Tìm kiếm khách hàng hoặc số điện thoại..." oninput="renderCalcHistory()">
             </div>
         </div>
 
@@ -491,8 +410,7 @@ MODERN STATS CARD
                         <th class="text-end pe-4">THAO TÁC</th>
                     </tr>
                 </thead>
-                <tbody id="calcHistoryTableBody">
-                    </tbody>
+                <tbody id="calcHistoryTableBody"></tbody>
             </table>
         </div>
 
@@ -501,7 +419,6 @@ MODERN STATS CARD
                 <h6 class="fw-800 text-primary text-uppercase mb-0" id="calcFormTitle">Tính hoa hồng mới</h6>
                 <button class="btn-close shadow-none" onclick="toggleCalcForm(false)"></button>
             </div>
-            
             <div class="row g-4">
                 <div class="col-md-7 border-end pe-md-4">
                     <div class="mb-3">
@@ -527,21 +444,20 @@ MODERN STATS CARD
                         </div>
                     </div>
                 </div>
-
                 <div class="col-md-5 bg-light rounded-4 p-4">
                     <div class="text-center bg-white p-3 rounded-3 shadow-sm mb-4 border border-success border-opacity-10">
                         <div class="small text-muted fw-700 mb-1 text-uppercase" style="letter-spacing: 0.5px;">Tổng hoa hồng</div>
                         <h3 id="resTotalFinal" class="fw-800 text-success mb-0">0đ</h3>
                     </div>
-                    <button class="btn btn-success w-100 py-3 rounded-pill fw-800 shadow mb-2" onclick="saveCalcToFirebase()">
-                        XÁC NHẬN LƯU
-                    </button>
+                    <button class="btn btn-success w-100 py-3 rounded-pill fw-800 shadow mb-2" onclick="saveCalcToFirebase()">XÁC NHẬN LƯU</button>
                     <button class="btn btn-light w-100 py-2 rounded-pill fw-700 text-muted" onclick="toggleCalcForm(false)">QUAY LẠI</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- PAYOUT TAB[cite: 12] -->
 <div id="tab-payout" class="tab-content d-none">
     <div class="container-fluid py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -557,8 +473,7 @@ MODERN STATS CARD
         <div id="payoutListFilter" class="table-container p-3 mb-4 bg-white shadow-sm border-0">
             <div class="input-group">
                 <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                <input type="text" id="searchPayout" class="form-control border-start-0 ps-0 shadow-none fw-600" 
-                       placeholder="Tìm kiếm khách hàng hoặc nội dung chi trả..." oninput="renderPayoutHistory()">
+                <input type="text" id="searchPayout" class="form-control border-start-0 ps-0 shadow-none fw-600" placeholder="Tìm kiếm khách hàng hoặc nội dung chi trả..." oninput="renderPayoutHistory()">
             </div>
         </div>
 
@@ -574,8 +489,7 @@ MODERN STATS CARD
                         <th class="text-end pe-4">THAO TÁC</th>
                     </tr>
                 </thead>
-                <tbody id="payoutHistoryTableBody">
-                    </tbody>
+                <tbody id="payoutHistoryTableBody"></tbody>
             </table>
         </div>
 
@@ -585,12 +499,10 @@ MODERN STATS CARD
                 <button class="btn-close shadow-none" onclick="togglePayoutForm(false)"></button>
             </div>
             <input type="hidden" id="editPayoutId">
-            
             <div class="mb-3">
                 <label class="small fw-700 mb-2 text-uppercase">Chọn khách hàng</label>
                 <select id="payoutLeadSelect" class="form-select border-2 rounded-3 py-2" onchange="updatePayoutInfo()"></select>
             </div>
-            
             <div class="row g-3 bg-light p-3 rounded-3 mb-3 border">
                 <div class="col-6">
                     <label class="small fw-700 text-muted">TỔNG HOA HỒNG</label>
@@ -601,7 +513,6 @@ MODERN STATS CARD
                     <div id="payoutRemain" class="fw-800 text-danger">0đ</div>
                 </div>
             </div>
-
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="small fw-700 mb-2 text-uppercase">Số tiền chi (VNĐ)</label>
@@ -615,12 +526,10 @@ MODERN STATS CARD
                     </select>
                 </div>
             </div>
-
             <div class="mb-4">
                 <label class="small fw-700 mb-2 text-uppercase">Ghi chú thanh toán</label>
                 <textarea id="payoutNote" class="form-control border-2" rows="2" placeholder="Ví dụ: Chuyển khoản đợt 1..."></textarea>
             </div>
-
             <div class="d-flex gap-2">
                 <button class="btn btn-primary w-100 py-3 rounded-pill fw-800 shadow" onclick="savePayout()">XÁC NHẬN LƯU</button>
                 <button class="btn btn-light px-4 rounded-pill fw-700 text-muted" onclick="togglePayoutForm(false)">QUAY LẠI</button>
@@ -628,26 +537,142 @@ MODERN STATS CARD
         </div>
     </div>
 </div>
+
+<!-- QUOTES TAB (QUẢN LÝ BÁO GIÁ)[cite: 12] -->
+<div id="tab-quotes" class="tab-content d-none">
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h5 class="fw-800 mb-0 text-success"><i class="bi bi-file-earmark-spreadsheet-fill me-2"></i>QUẢN LÝ BÁO GIÁ</h5>
+                <p class="text-muted small mb-0">Thiết lập, theo dõi dòng tiền báo giá và biên độ lợi nhuận</p>
+            </div>
+            <button class="btn btn-success rounded-pill px-4 fw-700 shadow-sm" onclick="toggleQuoteForm(true)">
+                <i class="bi bi-plus-lg me-2"></i>TẠO BÁO GIÁ
+            </button>
+        </div>
+
+        <div id="quoteListFilter" class="table-container p-3 mb-4 bg-white shadow-sm border-0">
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchQuote" class="form-control border-start-0 ps-0 shadow-none fw-600" placeholder="Tìm tên khách hàng, dự án..." oninput="renderQuotes()">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="filterQuoteStatus" class="form-select fw-600 shadow-none" onchange="renderQuotes()">
+                        <option value="all">Tất cả trạng thái báo giá</option>
+                        <option value="da_gui">Đã gửi khách</option>
+                        <option value="sua_1">Sửa lần 1</option>
+                        <option value="sua_2">Sửa lần 2</option>
+                        <option value="sua_3">Sửa lần 3</option>
+                        <option value="da_chot">Đã chốt báo giá</option>
+                        <option value="khong_chot">Khách không chốt</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="quoteListView" class="table-container shadow-sm border-0 bg-white">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">KHÁCH HÀNG / DỰ ÁN</th>
+                        <th>GIÁ TRỊ BÁO GIÁ</th>
+                        <th>DỰ KIẾN LỢI NHUẬN</th>
+                        <th>TRẠNG THÁI</th>
+                        <th>NGÀY GỬI</th>
+                        <th>ĐÍNH KÈM</th>
+                        <th class="text-end pe-4">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody id="quoteTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="quoteFormView" class="table-container p-4 d-none mx-auto border-0 shadow-lg" style="max-width: 850px;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="fw-800 text-primary text-uppercase mb-0" id="quoteFormTitle">Tạo bảng báo giá mới</h6>
+                <button class="btn-close shadow-none" onclick="toggleQuoteForm(false)"></button>
+            </div>
+            
+            <form id="mainQuoteForm" onsubmit="saveQuoteToFirebase(event)">
+                <input type="hidden" id="editQuoteId">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="small fw-700 mb-1 text-uppercase">1. Chọn Hồ sơ khách hàng</label>
+                        <select id="quoteLeadSelect" class="form-select py-2" required></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-700 mb-1 text-uppercase">2. Trạng thái báo giá</label>
+                        <select id="quoteStatusSelect" class="form-select py-2">
+                            <option value="da_gui">Đã gửi khách</option>
+                            <option value="sua_1">Sửa lần 1</option>
+                            <option value="sua_2">Sửa lần 2</option>
+                            <option value="sua_3">Sửa lần 3</option>
+                            <option value="da_chot">Đã chốt báo giá</option>
+                            <option value="khong_chot">Khách không chốt</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="small fw-700 mb-1 text-uppercase">3. Tổng tiền báo giá (VNĐ)</label>
+                        <input type="number" id="quoteTotalAmount" class="form-control py-2" placeholder="Ví dụ: 150000000" required oninput="calculateQuoteProfit()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-700 mb-1 text-uppercase">4. Giá vốn / Chi phí gốc (VNĐ)</label>
+                        <input type="number" id="quoteCostAmount" class="form-control py-2" placeholder="Ví dụ: 100000000" required oninput="calculateQuoteProfit()">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label class="small fw-700 mb-1 text-uppercase">5. Đường link file đính kèm (Drive/Dropbox/PDF)</label>
+        <input type="url" id="quoteLinkAttachment" class="form-control py-2" placeholder="https://drive.google.com/...">
+    </div>
+    <div class="col-md-6">
+        <label class="small fw-700 mb-1 text-uppercase">6. Chi phí Hoa hồng CTV (VNĐ) ⭐</label>
+        <input type="number" id="quoteCommissionAmount" class="form-control py-2" placeholder="Ví dụ: 5000000" value="0">
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <label class="small fw-700 mb-1 text-uppercase">Biên lợi nhuận dự kiến (Đã trừ giá vốn)</label>
+        <div class="form-control py-2 bg-light fw-800 text-success" id="quoteProfitDisplay" style="border: 1px dashed #059669;">0đ (0%)</div>
+    </div>
+</div>
+
+                <div class="mb-4">
+                    <label class="small fw-700 mb-1 text-uppercase">Ghi chú phiên bản báo giá</label>
+                    <textarea id="quoteNote" class="form-control" rows="2" placeholder="Ghi chú yêu cầu thay đổi của khách hàng hoặc lý do chỉnh sửa..."></textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-800 shadow">XÁC NHẬN LƯU BÁO GIÁ</button>
+                    <button type="button" class="btn btn-light px-4 rounded-pill fw-700 text-muted" onclick="toggleQuoteForm(false)">QUAY LẠI</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </div>
 </div>
 </div>
 
-<!-- ========================= -->
-<!-- MODAL UPDATE (BẮT BUỘC) -->
-<!-- ========================= -->
+<!-- MODALS[cite: 12] -->
 <div class="modal fade" id="updateStatusModal">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content rounded-4">
-
 <div class="modal-header">
 <h5 class="modal-title">Cập nhật khách</h5>
 <button class="btn-close" data-bs-dismiss="modal"></button>
 </div>
-
 <div class="modal-body">
-
 <input type="hidden" id="currentLeadId">
-
 <label>Trạng thái</label>
 <select id="statusSelect" class="form-select mb-3">
 <option value="1">Mới</option>
@@ -656,20 +681,17 @@ MODERN STATS CARD
 <option value="4">Chốt</option>
 <option value="5">Hoàn tất</option>
 </select>
-
 <label>Hoa hồng</label>
 <input id="commissionValue" class="form-control" type="number">
-
 </div>
-
 <div class="modal-footer">
 <button class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
 <button class="btn btn-success" onclick="confirmUpdate()">Lưu</button>
 </div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
-</div>
 <div class="modal fade" id="addLeadModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
@@ -705,56 +727,70 @@ MODERN STATS CARD
         </div>
     </div>
 </div>
-<!-- SCRIPTS -->
+
+<!-- SCRIPTS[cite: 12] -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="./js/app.js"></script>
 
-<!-- TAB SCRIPT -->
+<!-- TAB SCRIPT (ĐÃ SỬA LỖI ĐIỀU HƯỚNG BÁO GIÁ)[cite: 12] -->
 <script>
 document.querySelectorAll("#adminTabs .nav-link").forEach(link => {
     link.addEventListener("click", e => {
         e.preventDefault();
 
-        // 1. Xử lý trạng thái Active trên Menu
-        document.querySelectorAll("#adminTabs .nav-link").forEach(l => l.classList.remove("active"));
-        link.classList.add("active");
+        // 1. Xử lý trạng thái Active trên Menu[cite: 12]
+        document.querySelectorAll("#adminTabs .nav-link").forEach(l => l.classList.remove("active")); //[cite: 12]
+        link.classList.add("active"); //[cite: 12]
 
-        // 2. Ẩn/Hiện nội dung Tab
-        const targetTabId = link.dataset.tab;
-        document.querySelectorAll(".tab-content").forEach(t => t.classList.add("d-none"));
+        // 2. Ẩn/Hiện nội dung Tab[cite: 12]
+        const targetTabId = link.dataset.tab; //[cite: 12]
+        document.querySelectorAll(".tab-content").forEach(t => t.classList.add("d-none")); //[cite: 12]
         
-        const targetEl = document.getElementById(targetTabId);
+        const targetEl = document.getElementById(targetTabId); //[cite: 12]
         if (targetEl) {
-            targetEl.classList.remove("d-none");
+            targetEl.classList.remove("d-none"); //[cite: 12]
 
-            // 3. KÍCH HOẠT LOGIC THEO TỪNG TAB
+            // 3. KÍCH HOẠT LOGIC THEO TỪNG TAB[cite: 12]
             
-            // Tab Báo cáo: Vẽ biểu đồ
-            if (targetTabId === "tab-reports") {
+            // Kích hoạt nạp dữ liệu Báo giá khi nhấn vào Tab
+            if (targetTabId === "tab-quotes") {
+                if (typeof window.toggleQuoteForm === "function") {
+                    window.toggleQuoteForm(false);
+                }
+                if (typeof window.initQuoteLeadSelect === "function") {
+                    window.initQuoteLeadSelect();
+                }
+                if (typeof window.renderQuotes === "function") {
+                    window.renderQuotes();
+                }
+            }
+            
+            // Tab Báo cáo: Vẽ biểu đồ[cite: 12]
+            else if (targetTabId === "tab-reports") {
                 setTimeout(() => {
                     if (typeof window.renderReportChart === "function") {
-                        window.renderReportChart();
+                        window.renderReportChart(); //[cite: 12]
                     }
                 }, 100);
             } 
             
-            // Tab Tính hoa hồng: Hiện danh sách lịch sử
+            // Tab Tính hoa hồng: Hiện danh sách lịch sử[cite: 12]
             else if (targetTabId === "tab-calculator") {
                 if (typeof window.toggleCalcForm === "function") {
-                    window.toggleCalcForm(false);
+                    window.toggleCalcForm(false); //[cite: 12]
                 }
                 if (typeof window.renderCalcHistory === "function") {
-                    window.renderCalcHistory();
+                    window.renderCalcHistory(); //[cite: 12]
                 }
             }
 
-            // Tab Lịch sử thanh toán: Tự động load danh sách phiếu chi cũ
+            // Tab Lịch sử thanh toán: Tự động load danh sách phiếu chi cũ[cite: 12]
             else if (targetTabId === "tab-payout") {
                 if (typeof window.togglePayoutForm === "function") {
-                    window.togglePayoutForm(false); // Luôn hiện danh sách trước khi vào tab
+                    window.togglePayoutForm(false); //[cite: 12]
                 }
                 if (typeof window.renderPayoutHistory === "function") {
-                    window.renderPayoutHistory(); // Vẽ lại các phiếu chi từ Firebase
+                    window.renderPayoutHistory(); //[cite: 12]
                 }
             }
         }
