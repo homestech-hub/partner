@@ -160,6 +160,26 @@
     color:#047857;
     letter-spacing:.2px;
 }
+/* Màu sắc trạng thái cho từng bước xử lý trên Mobile */
+.step-badge {
+    font-size: 0.65rem;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-weight: 700;
+}
+.step-1 { background-color: #f1f5f9; color: #64748b; } /* Mới tiếp nhận */
+.step-2 { background-color: #fef9c3; color: #a16207; } /* Đang khảo sát */
+.step-3 { background-color: #e0f2fe; color: #0369a1; } /* Đã báo giá */
+.step-4 { background-color: #dcfce7; color: #15803d; } /* Đã chốt đơn */
+.step-5 { background-color: #fee2e2; color: #b91c1c; } /* Hủy bỏ */
+
+/* Hiệu ứng làm mờ khách hàng đã hoàn tất */
+.lead-archived {
+    opacity: 0.55;
+    filter: grayscale(30%);
+    border: 1px dashed #cbd5e1 !important;
+    background-color: #f8fafc !important;
+}
     </style>
 </head>
 <body>
