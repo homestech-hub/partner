@@ -128,9 +128,9 @@ window.applyFilters = () => {
                 <button class="btn btn-success btn-sm" onclick="window.openUpdateModal('${key}', ${step}, ${l.commission || 0})">
                     <i class="bi bi-arrow-repeat"></i>
                 </button>
-                <button class="btn btn-primary btn-sm" onclick="window.openEditLeadModal('${key}', '${l.name || "N/A"}', '${l.phone || ""}', '${l.project || "N/A"}', \`${(l.address || "").replace(/`/g, '\\`').replace(/\n/g, ' ')}\`)">
-                    <i class="bi bi-pencil-square"></i>
-                </button>
+                <button class="btn btn-primary btn-sm" onclick="window.openEditLeadModal('${key}', '${l.name || "N/A"}', '${l.phone || ""}', '${l.project || "N/A"}', '${l.sourceCTV || "Admin"}', \`${(l.address || "").replace(/`/g, '\\`').replace(/\n/g, ' ')}\`)">
+    <i class="bi bi-pencil-square"></i>
+</button>
                 <button class="btn btn-danger btn-sm" onclick="window.deleteLead('${key}')">
                     <i class="bi bi-trash"></i>
                 </button>
@@ -240,18 +240,22 @@ function renderCTVTable(users) {
 // FILTER CTV
 // =========================
 function renderCTVFilter(users) {
-    const select = document.getElementById("filterCTV"); //
-    if (!select) return; //
+    const filterSelect = document.getElementById("filterCTV"); // Bộ lọc ngoài Dashboard
+    const formSelect = document.getElementById("newLeadSource"); // Dropdown trong Form thêm mới khách
 
-    let html = `<option value="">Tất cả CTV</option>`; //
+    let filterHtml = `<option value="">Tất cả CTV</option>`; //
+    let formHtml = `<option value="Admin">Trực tiếp (Hệ thống / Admin)</option>`; // Mặc định nếu không chọn ai sẽ tính cho Admin
 
     Object.entries(users).forEach(([uid, u]) => {
         if (u.role === "partner") { //
-            html += `<option value="${uid}">${u.fullName || u.email}</option>`; //
+            const displayName = u.fullName || u.name || u.email;
+            filterHtml += `<option value="${uid}">${displayName}</option>`; //
+            formHtml += `<option value="${uid}">${displayName}</option>`; // Đẩy vào danh sách chọn tạo hộ khách cho CTV
         }
     });
 
-    select.innerHTML = html; //
+    if (filterSelect) filterSelect.innerHTML = filterHtml; //
+    if (formSelect) formSelect.innerHTML = formHtml;
 }
 
 // =========================
@@ -854,33 +858,37 @@ document.getElementById("addLeadForm").onsubmit = async (e) => {
         name: document.getElementById("newLeadName").value, //
         phone: document.getElementById("newLeadPhone").value, //
         project: document.getElementById("newLeadProject").value, //
+        address: document.getElementById("newLeadAddress").value.trim(), // 🌟 LƯU ĐỊA CHỈ MỚI VÀO ĐÂY
         sourceCTV: document.getElementById("newLeadSource").value || "Admin", //
-        step: 1, //
-        status: "Đang xử lý", //
-        createdAt: Date.now(),
-        dateDisplay: new Date().toLocaleDateString('vi-VN'), //
-        commission: 0 //
+        step: editId ? undefined : 1, // Giữ nguyên tiến độ cũ nếu đang sửa
+        status: editId ? undefined : "Đang xử lý", //
+        updatedAt: Date.now()
     };
 
     try {
         if (editId) {
-            // Chế độ chỉnh sửa
+            // Chế độ chỉnh sửa: Cập nhật cả địa chỉ
             await update(ref(db, `COMPANIES/homestech/leads/${editId}`), {
                 name: newLead.name,
                 phone: newLead.phone,
                 project: newLead.project,
+                address: newLead.address, // Cập nhật địa chỉ
+                sourceCTV: newLead.sourceCTV,
                 updatedAt: Date.now()
             });
             alert("Cập nhật thông tin khách hàng thành công!");
             delete e.target.dataset.editId;
         } else {
             // Chế độ thêm mới
+            newLead.createdAt = Date.now();
+            newLead.dateDisplay = new Date().toLocaleDateString('vi-VN'); //
+            newLead.commission = 0; //
             await push(ref(db, "COMPANIES/homestech/leads"), newLead); //
             alert("Thêm khách hàng thành công!");
         }
         bootstrap.Modal.getInstance(document.getElementById('addLeadModal')).hide(); //
         document.getElementById("addLeadForm").reset(); //
-        document.querySelector("#addLeadModal h5").innerText = "THÊM KHÁCH HÀNG MỚI";
+        document.querySelector("#addLeadModal h5").innerText = "THÊM KHÁCH HÀNG MỚI"; //
     } catch (error) {
         alert("Lỗi: " + error.message); //
     }
@@ -894,24 +902,24 @@ window.deleteLead = (key) => {
     }
 };
 
-window.openEditLeadModal = (key, name, phone, project, address) => {
-    // 1. Gán dữ liệu cũ vào các ô Input
-    document.getElementById("newLeadName").value = name;
-    document.getElementById("newLeadPhone").value = phone;
-    document.getElementById("newLeadProject").value = project;
+//
+window.openEditLeadModal = (key, name, phone, project, sourceCTV, address) => {
+    document.getElementById("newLeadName").value = name; //
+    document.getElementById("newLeadPhone").value = phone; //
+    document.getElementById("newLeadProject").value = project; //
+    document.getElementById("newLeadAddress").value = address || ""; // 🌟 TỰ ĐIỀN ĐỊA CHỈ CŨ
     
-    // Nếu sau này Form "addLeadModal" của bạn bổ sung thêm ô nhập địa chỉ, nó sẽ tự điền vào:
-    const addrInput = document.getElementById("newLeadAddress");
-    if (addrInput) addrInput.value = address || "";
-
-    // Lưu lại ID của khách hàng đang sửa vào Dataset của Form
-    document.getElementById("addLeadForm").dataset.editId = key;
+    const sourceSelect = document.getElementById("newLeadSource");
+    if (sourceSelect) {
+        sourceSelect.value = sourceCTV || "Admin";
+    }
     
-    // Mở Modal
-    const modalEl = document.getElementById('addLeadModal');
-    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    document.getElementById("addLeadForm").dataset.editId = key; //
+    document.querySelector("#addLeadModal h5").innerText = "CHỈNH SỬA HỒ SƠ"; //
+    
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('addLeadModal')); //
+    modal.show(); //
 };
-
 // =========================================================================
 // CRM MODULE: QUẢN LÝ BÁO GIÁ (MỚI TÍCH HỢP)
 // =========================================================================
@@ -1160,3 +1168,5 @@ document.addEventListener("DOMContentLoaded", () => {
         searchQuoteInput.addEventListener("input", () => window.renderQuotes());
     }
 });
+
+//
