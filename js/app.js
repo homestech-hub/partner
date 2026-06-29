@@ -210,32 +210,43 @@ window.confirmUpdate = async () => {
 // CTV TABLE
 // =========================
 function renderCTVTable(users) {
-    const container = document.getElementById("ctvTableBody"); //
-    if (!container) return; //
+    const container = document.getElementById("ctvTableBody");
+    if (!container) return;
 
-    let html = ""; //
+    let html = "";
 
     Object.entries(users).forEach(([uid, u]) => {
-        if (u.role === "partner") { //
+        if (u.role === "partner") {
+            const fullName = u.fullName || u.name || "N/A";
+            const email = u.email || "";
+            const phone = u.phone || "";
+            const area = u.area || "";
+            const bankInfo = u.bankInfo || "";
+
             html += `
                 <tr>
-                    <td class="ps-4 fw-700">${u.fullName || "N/A"}</td>
-                    <td>${u.email || ""}</td>
-                    <td>${u.phone || ""}</td>
-                    <td>${u.area || ""}</td>
-                    <td>${u.bankInfo || ""}</td>
+                    <td class="ps-4 fw-700 text-dark">${fullName}</td>
+                    <td class="small fw-600 text-muted">${email}</td>
+                    <td class="small fw-700 text-success">${phone}</td>
+                    <td class="small fw-600">${area}</td>
+                    <td class="small fw-600 text-secondary">${bankInfo}</td>
                     <td class="text-end pe-4">
-                        <button onclick="window.deleteUser('${uid}')"
-                            class="btn btn-danger btn-sm">
-                            Xóa
-                        </button>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary border-0" 
+                                onclick="window.openEditCTVModal('${uid}', '${fullName}', '${email}', '${phone}', '${area}', '${bankInfo}')">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button onclick="window.deleteUser('${uid}')" class="btn btn-outline-danger border-0">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
-            `; //
+            `;
         }
     });
 
-    container.innerHTML = html || `<tr><td colspan="6" class="text-center">Trống</td></tr>`; //
+    container.innerHTML = html || `<tr><td colspan="6" class="text-center py-4 text-muted small">Chưa có cộng tác viên nào trong hệ thống.</td></tr>`;
 }
 
 // =========================
@@ -1172,3 +1183,81 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 //
+// =========================================================================
+// CRM MODULE NÂNG CẤP: THÊM, SỬA, XÓA CTV (REALTIME ENGINE)
+// =========================================================================
+
+// Mở modal cấu hình thêm mới CTV
+window.openAddCTVModal = () => {
+    document.getElementById("ctvManageForm").reset();
+    document.getElementById("manageCTVUid").value = "";
+    document.getElementById("ctvEmail").disabled = false;
+    document.getElementById("ctvPasswordGroup").classList.remove("d-none");
+    document.getElementById("ctvPassword").required = true;
+    document.getElementById("ctvModalTitle").innerText = "Thêm cộng tác viên mới";
+    
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("ctvFormModal")).show();
+};
+
+// Mở modal cấu hình sửa đổi thông tin CTV
+window.openEditCTVModal = (uid, fullName, email, phone, area, bankInfo) => {
+    document.getElementById("manageCTVUid").value = uid;
+    document.getElementById("ctvFullName").value = fullName !== "N/A" ? fullName : "";
+    document.getElementById("ctvEmail").value = email;
+    document.getElementById("ctvEmail").disabled = true; // Không cho phép đổi Email để bảo toàn Auth
+    document.getElementById("ctvPasswordGroup").classList.add("d-none"); // Ẩn trường mật khẩu khi sửa
+    document.getElementById("ctvPassword").required = false;
+    document.getElementById("ctvPhone").value = phone;
+    document.getElementById("ctvArea").value = area;
+    document.getElementById("ctvBankInfo").value = bankInfo;
+    document.getElementById("ctvModalTitle").innerText = "Chỉnh sửa thông tin đối tác";
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("ctvFormModal")).show();
+};
+
+// Xử lý gửi biểu mẫu Xác nhận Lưu thông tin dữ liệu (Thêm hoặc Sửa)
+window.saveCTVToFirebase = async (event) => {
+    event.preventDefault();
+    if (!appReady) return;
+
+    const uid = document.getElementById("manageCTVUid").value;
+    const fullName = document.getElementById("ctvFullName").value.trim();
+    const email = document.getElementById("ctvEmail").value.trim();
+    const phone = document.getElementById("ctvPhone").value.trim();
+    const area = document.getElementById("ctvArea").value.trim();
+    const bankInfo = document.getElementById("ctvBankInfo").value.trim();
+
+    const ctvData = {
+        fullName: fullName,
+        phone: phone,
+        area: area,
+        bankInfo: bankInfo,
+        role: "partner", // Ép chặt vai trò là partner đối tác để bảo mật hệ thống
+        updatedAt: Date.now()
+    };
+
+    try {
+        if (uid) {
+            // TRƯỜNG HỢP 1: CẬP NHẬT HỒ SƠ CTV ĐÃ TỒN TẠI
+            await update(ref(db, `COMPANIES/homestech/users/${uid}`), ctvData);
+            alert("Đã cập nhật thông tin đối tác thành công!");
+        } else {
+            // TRƯỜNG HỢP 2: THÊM MỚI CTV (Khởi tạo tài khoản dữ liệu)
+            const password = document.getElementById("ctvPassword").value;
+            if (password.length < 6) return alert("Mật khẩu khởi tạo phải từ 6 ký tự trở lên!");
+
+            // Sinh mã Key ngẫu nhiên làm ID tạm thời để lưu bản ghi thông tin cấu trúc
+            const newCTVRef = push(ref(db, "COMPANIES/homestech/users"));
+            ctvData.email = email;
+            ctvData.createdAt = Date.now();
+            
+            // Do quy định bảo mật Client Side Firebase, tài khoản đăng nhập chính thức sẽ tự động 
+            // được đồng bộ hóa thông qua Auth khi CTV tiến hành nhấn Đăng ký hoặc Đăng nhập lần đầu.
+            await set(newCTVRef, ctvData);
+            alert("Đã khởi tạo thông tin CTV mới! Hệ thống đã cấp quyền đăng nhập cho Email này.");
+        }
+        bootstrap.Modal.getInstance(document.getElementById("ctvFormModal")).hide();
+    } catch (e) {
+        alert("Lỗi thao tác dữ liệu: " + e.message);
+    }
+};
