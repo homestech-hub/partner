@@ -209,7 +209,11 @@
             <div class="mb-3"><select id="cProject" class="form-select input-mobile"><option value="Công trình Nhà ở">Công trình Nhà ở / Villa</option><option value="Dự án Villa/Resort">Dự án Kh sạn / Resort</option><option value="Cơ sở Kinh doanh">Dự án Nhà Hàng / cafe ...</option><option value="Khác">Khác...</option></select></div>
             <div class="mb-3"><div class="input-group"><input type="text" id="cAddress" class="form-control input-mobile" placeholder="Nhập địa chỉ hoặc lấy tọa độ Vị trí..." required><button class="btn btn-success px-3" type="button" onclick="getCurrentLocation()"><i class="bi bi-geo-alt"></i></button></div></div>
             <div class="mb-3"><textarea id="cNote" class="form-control input-mobile" rows="2" placeholder="Nội dung yêu cầu..."></textarea></div>
-            <div class="mb-4"><label class="small fw-700 mb-2 text-success">Hình ảnh công trình</label><input type="file" id="img-1" class="form-control input-mobile mb-2" onchange="handleImageStep(1)"><input type="file" id="img-2" class="form-control input-mobile mb-2 d-none" onchange="handleImageStep(2)"><input type="file" id="img-3" class="form-control input-mobile d-none" onchange="handleImageStep(3)"><div id="imagePreview" class="d-flex gap-2 mt-2 flex-wrap"></div></div>
+            <div class="mb-4">
+    <label class="small fw-700 mb-1 text-uppercase text-success">Đường link hình ảnh/video công trình</label>
+    <input type="url" id="cImageLink" class="form-control input-mobile" placeholder="Dán link Google Drive, Dropbox, Photo...">
+    <div class="form-text text-muted" style="font-size: 0.65rem;">Gợi ý: Tải ảnh lên Drive của bạn, bật quyền chia sẻ công khai và dán link vào đây.</div>
+</div>
             <div class="d-flex gap-2"><button type="button" class="btn btn-light w-100 py-3 rounded-pill fw-700" data-bs-dismiss="modal">ĐÓNG</button><button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-800 shadow">GỬI NGAY</button></div>
         </form>
     </div></div></div></div>
