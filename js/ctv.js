@@ -35,6 +35,7 @@ window.handleImageStep = (step) => {
 };
 
 // --- 3. GỬI DỮ LIỆU LÊN FIREBASE ---
+// --- 3. GỬI DỮ LIỆU LÊN FIREBASE (ĐÃ CHUYỂN SANG DẠNG LINK ẢNH) ---
 const leadForm = document.getElementById("addLeadForm");
 if (leadForm) {
     leadForm.onsubmit = async (e) => {
@@ -47,13 +48,17 @@ if (leadForm) {
         btnSubmit.innerText = "ĐANG GỬI...";
 
         const now = new Date();
+        
+        // Đọc giá trị link hình ảnh từ ô input mới
+        const imageLink = document.getElementById("cImageLink").value.trim();
+
         const leadData = {
             name: document.getElementById("cName").value,
             phone: document.getElementById("cPhone").value,
             project: document.getElementById("cProject").value,
             address: document.getElementById("cAddress").value,
             note: document.getElementById("cNote").value || "", 
-            images: imageArray,
+            imageLink: imageLink, // 🌟 Thay đổi trường dữ liệu từ mảng images thành 1 chuỗi string link duy nhất
             sourceCTV: user.uid,
             status: "cho_duyet",
             step: 1,
