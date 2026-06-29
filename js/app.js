@@ -128,9 +128,11 @@ window.applyFilters = () => {
                 <button class="btn btn-success btn-sm" onclick="window.openUpdateModal('${key}', ${step}, ${l.commission || 0})">
                     <i class="bi bi-arrow-repeat"></i>
                 </button>
-                <button class="btn btn-primary btn-sm" onclick="window.openEditLeadModal('${key}', '${l.name || "N/A"}', '${l.phone || ""}', '${l.project || "N/A"}', '${l.sourceCTV || "Admin"}', \`${(l.address || "").replace(/`/g, '\\`').replace(/\n/g, ' ')}\`)">
-    <i class="bi bi-pencil-square"></i>
-</button>
+                
+                <button class="btn btn-primary btn-sm" onclick="window.openEditLeadModal('${key}', '${(l.name || "N/A").replace(/'/g, "\\'")}', '${l.phone || ""}', '${l.project || "N/A"}', '${l.sourceCTV || "Admin"}', '${(l.address || "").replace(/'/g, "\\'").replace(/\n/g, " ")}')">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                
                 <button class="btn btn-danger btn-sm" onclick="window.deleteLead('${key}')">
                     <i class="bi bi-trash"></i>
                 </button>
