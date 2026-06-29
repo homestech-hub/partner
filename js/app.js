@@ -299,138 +299,257 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// =========================
-// LOGIC BÁO CÁO
-// =========================
+// =========================================================================
+// ADVANCED CRM ENGINE: PHÂN HỆ BÁO CÁO CHUYÊN SÂU ĐA NĂNG
+// =========================================================================
+
+// 1. Hàm cốt lõi tính toán và kết xuất dữ liệu báo cáo theo bộ lọc đa tầng
+window.processAdvancedReports = () => {
+    if (!appReady || allLeads.length === 0) return;
+
+    const timeFilter = document.getElementById("repFilterTime")?.value || "all";
+    const ctvFilter = document.getElementById("repFilterCTV")?.value || "all";
+    const tbody = document.getElementById("repTableBody");
+
+    if (!tbody) return;
+
+    // Khởi tạo các biến tích lũy KPI báo cáo
+    let totalContractValue = 0;
+    let totalCommissionValue = 0;
+    let successCount = 0;
+    let filteredCount = 0;
+    let tableHtml = "";
+
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    const currentQuarter = Math.floor((now.getMonth() + 3) / 3);
+
+    const labels = ["", "Mới tiếp nhận", "Đang khảo sát", "Đã báo giá", "Đã chốt đơn", "Không chốt được ✖"];
+
+    allLeads.forEach(([key, l]) => {
+        const u = allUsers[l.sourceCTV];
+        const ctvName = u ? (u.fullName || u.name || u.email) : "Trực tiếp";
+        const step = parseInt(l.step) || 1;
+
+        // --- A. KIỂM TRA BỘ LỌC ĐỐI TÁC CTV ---
+        const matchCTV = (ctvFilter === "all") || (l.sourceCTV === ctvFilter);
+
+        // --- B. KIỂM TRA BỘ LỌC DÒNG THỜI GIAN (Dựa vào updatedAt hoặc createdAt) ---
+        let matchTime = false;
+        const dateTarget = new Date(l.updatedAt || l.createdAt || Date.now());
+        const targetMonth = dateTarget.getMonth() + 1;
+        const targetYear = dateTarget.getFullYear();
+        const targetQuarter = Math.floor((dateTarget.getMonth() + 3) / 3);
+
+        if (timeFilter === "all") {
+            matchTime = true;
+        } else if (timeFilter === "month_current") {
+            matchTime = (targetMonth === currentMonth && targetYear === currentYear);
+        } else if (timeFilter === "quarter_current") {
+            matchTime = (targetQuarter === currentQuarter && targetYear === currentYear);
+        } else if (timeFilter === "year_current") {
+            matchTime = (targetYear === currentYear);
+        }
+
+        // --- C. XỬ LÝ TRÍCH XUẤT SỐ LIỆU VÀ KẾT XUẤT BẢNG ---
+        if (matchCTV && matchTime) {
+            filteredCount++;
+            const contractVal = parseInt(l.contractValue || l.totalAmount || 0);
+            const commVal = parseInt(l.commission || 0);
+
+            // Chỉ cộng dồn giá trị tài chính đối với các đơn hàng đã ký thành công (Step 4)
+            if (step === 4) {
+                successCount++;
+                totalContractValue += contractVal;
+                totalCommissionValue += commVal;
+            }
+
+            // Sinh chuỗi dòng dữ liệu cho bảng kết xuất chi tiết
+            tableHtml += `
+                <tr>
+                    <td class="ps-3 py-2.5">
+                        <div class="fw-800 text-dark small">${l.name || 'N/A'}</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">${l.phone || ''}</div>
+                    </td>
+                    <td><span class="badge bg-light text-dark border px-2 py-1">${ctvName}</span></td>
+                    <td class="fw-700 text-dark small">${contractVal.toLocaleString()}đ</td>
+                    <td class="fw-700 text-success small">${commVal.toLocaleString()}đ</td>
+                    <td class="pe-3"><span class="step-pill step-${step}" style="font-size:0.6rem; padding: 3px 8px;">${labels[step]}</span></td>
+                </tr>
+            `;
+        }
+    });
+
+    // --- D. ĐỒNG BỘ DỮ LIỆU LÊN HỆ THỐNG THẺ KPI MODERN CARD ---
+    const conversionRate = allLeads.length > 0 ? ((successCount / allLeads.length) * 100).toFixed(1) : 0;
+
+    if (document.getElementById("repStatContract")) document.getElementById("repStatContract").innerText = totalContractValue.toLocaleString() + "đ";
+    if (document.getElementById("repStatComm")) document.getElementById("repStatComm").innerText = totalCommissionValue.toLocaleString() + "đ";
+    if (document.getElementById("repStatCountSuccess")) document.getElementById("repStatCountSuccess").innerText = successCount;
+    if (document.getElementById("repStatConversion")) document.getElementById("repStatConversion").innerText = conversionRate + "%";
+    if (document.getElementById("repTableCount")) document.getElementById("repTableCount").innerText = `${filteredCount} khách hàng thỏa lọc`;
+
+    tbody.innerHTML = tableHtml || `<tr><td colspan="5" class="text-center py-4 text-muted small">Không tìm thấy dữ liệu phù hợp bộ lọc đa năng</td></tr>`;
+};
+
+// 2. Tự động nạp danh sách CTV thực tế vào bộ lọc Dropdown riêng của Tab Báo cáo
+function syncReportCTVDropdown(users) {
+    const select = document.getElementById("repFilterCTV");
+    if (!select) return;
+
+    let html = `<option value="all">Tất cả nguồn đối tác (CTV)</option>`;
+    Object.entries(users).forEach(([uid, u]) => {
+        if (u.role === "partner") {
+            html += `<option value="${uid}">${u.fullName || u.email}</option>`;
+        }
+    });
+    select.innerHTML = html;
+}
+
+// 3. Xây dựng cấu trúc mảng doanh thu 12 tháng (Lấy theo Doanh số Giá trị HĐ của đơn chốt thành công)
 function buildMonthlyRevenue(leads) {
-    const currentYear = new Date().getFullYear(); //
-    const months = {}; //
-    for (let i = 1; i <= 12; i++) { //
-        months[String(i).padStart(2, "0")] = 0; //
+    const currentYear = new Date().getFullYear();
+    const months = {};
+    for (let i = 1; i <= 12; i++) {
+        months[String(i).padStart(2, "0")] = 0;
     }
 
     Object.values(leads).forEach(l => {
-        if (!l.updatedAt || parseInt(l.step) < 4) return; //
+        if (!l.updatedAt || parseInt(l.step) !== 4) return;
         
-        const date = new Date(l.updatedAt); //
-        if (date.getFullYear() === currentYear) { //
-            const mKey = String(date.getMonth() + 1).padStart(2, "0"); //
-            months[mKey] += parseInt(l.commission || 0); //
+        const date = new Date(l.updatedAt);
+        if (date.getFullYear() === currentYear) {
+            const mKey = String(date.getMonth() + 1).padStart(2, "0");
+            // Biểu đồ tổng quan hiển thị Giá trị HĐ thực tế mà công ty chốt được
+            months[mKey] += parseInt(l.contractValue || l.totalAmount || 0);
         }
     });
 
-    return Object.keys(months).sort().map(m => ({ //
-        month: "T" + m, //
-        revenue: months[m] //
+    return Object.keys(months).sort().map(m => ({
+        month: "T" + m,
+        revenue: months[m]
     }));
 }
 
+// 4. Hàm khởi động chính khi chuyển đổi Tab báo cáo
 window.renderReportChart = () => {
-    const el = document.getElementById("monthlyChart"); //
-    if (!el || allLeads.length === 0) return; //
+    const el = document.getElementById("monthlyChart");
+    if (!el || allLeads.length === 0) return;
 
-    const data = buildMonthlyRevenue(Object.fromEntries(allLeads)); //
-    let maxRev = Math.max(...data.map(d => d.revenue)) || 1; //
+    // Đồng bộ Dropdown đối tác
+    syncReportCTVDropdown(allUsers);
+
+    // Chạy bộ lọc danh sách và KPI thời gian thực
+    window.processAdvancedReports();
+
+    // Khởi tạo đồ thị cột dọc Doanh số hợp đồng ký kết
+    const data = buildMonthlyRevenue(Object.fromEntries(allLeads));
+    let maxRev = Math.max(...data.map(d => d.revenue)) || 1;
     
-    let html = `<div class="d-flex align-items-end justify-content-between h-100 gap-2">`; //
+    let html = `<div class="d-flex align-items-end justify-content-between h-100 gap-2">`;
     data.forEach(d => {
-        const height = (d.revenue / maxRev) * 100; //
+        const height = (d.revenue / maxRev) * 100;
         html += `
             <div class="text-center flex-grow-1 d-flex flex-column justify-content-end h-100">
-                <div class="small fw-800 mb-1" style="font-size:0.65rem; color:var(--primary)">
+                <div class="small fw-800 mb-1" style="font-size:0.6rem; color:var(--primary)">
                     ${d.revenue > 0 ? (d.revenue/1000000).toFixed(1) + 'M' : ''}
                 </div>
-                <div style="height: ${Math.max(height, 2)}%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
-                <div class="small mt-2 text-muted fw-700" style="font-size:0.6rem">${d.month}</div>
-            </div>`; //
+                <div style="height: ${Math.max(height, 3)}%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                <div class="small mt-2 text-muted fw-700" style="font-size:0.55rem">${d.month}</div>
+            </div>`;
     });
-    html += `</div>`; //
-    el.innerHTML = html; //
+    html += `</div>`;
+    el.innerHTML = html;
 
-    renderTopCTV(); //
-    renderStatusPie(); //
+    // Vẽ 2 phân hệ biểu đồ tròn và bảng xếp hạng đi kèm
+    renderTopCTV();
+    renderStatusPie();
 };
 
+// 5. Kết xuất Biểu đồ tỷ trọng trạng thái hình tròn
 function renderStatusPie() {
-    const el = document.getElementById("statusChart"); //
-    if (!el) return; //
+    const el = document.getElementById("statusChart");
+    if (!el) return;
     
-    let stats = { new: 0, processing: 0, done: 0 }; //
+    let stats = { new: 0, processing: 0, done: 0 };
     allLeads.forEach(([k, l]) => {
-        const s = parseInt(l.step); //
-        if (s <= 1) stats.new++; //
-        else if (s < 4) stats.processing++; //
-        else stats.done++; //
+        const s = parseInt(l.step);
+        if (s <= 1) stats.new++;
+        else if (s < 4) stats.processing++;
+        else stats.done++;
     });
 
-    const total = allLeads.length || 1; //
-    const p1 = (stats.new / total) * 100; //
-    const p2 = (stats.processing / total) * 100; //
+    const total = allLeads.length || 1;
+    const p1 = (stats.new / total) * 100;
+    const p2 = (stats.processing / total) * 100;
 
     el.innerHTML = `
         <div class="d-flex flex-column align-items-center justify-content-center h-100">
-            <div style="width:120px; height:120px; border-radius:50%; background: conic-gradient(#e2e8f0 0% ${p1}%, #fbbf24 ${p1}% ${p1+p2}%, #059669 ${p1+p2}% 100%);"></div>
-            <div class="mt-3 w-100" style="font-size:0.7rem">
-                <div class="d-flex justify-content-between mb-1"><span>Mới:</span> <b>${stats.new}</b></div>
-                <div class="d-flex justify-content-between mb-1"><span>Xử lý:</span> <b>${stats.processing}</b></div>
-                <div class="d-flex justify-content-between text-success"><span>Chốt:</span> <b>${stats.done}</b></div>
+            <div style="width:110px; height:110px; border-radius:50%; background: conic-gradient(#cbd5e1 0% ${p1}%, #fbbf24 ${p1}% ${p1+p2}%, #059669 ${p1+p2}% 100%);"></div>
+            <div class="mt-3 w-100" style="font-size:0.65rem">
+                <div class="d-flex justify-content-between mb-1"><span>Mới (Chưa xử lý):</span> <b>${stats.new}</b></div>
+                <div class="d-flex justify-content-between mb-1"><span>Đang chăm sóc:</span> <b>${stats.processing}</b></div>
+                <div class="d-flex justify-content-between text-success"><span>Đã ký thành công ✔:</span> <b>${stats.done}</b></div>
             </div>
-        </div>`; //
+        </div>`;
 }
 
+// 6. Xếp hạng hiệu quả mang lại doanh số của nguồn Cộng tác viên
 window.renderTopCTV = () => {
-    const container = document.getElementById("topCTVList"); //
-    if (!container) return; //
+    const container = document.getElementById("topCTVList");
+    if (!container) return;
 
-    const stats = {}; //
+    const stats = {};
     allLeads.forEach(([key, lead]) => {
-        const uid = lead.sourceCTV; //
-        if (!uid) return; //
+        const uid = lead.sourceCTV;
+        if (!uid) return;
 
         if (!stats[uid]) {
-            const u = allUsers[uid]; //
+            const u = allUsers[uid];
             stats[uid] = {
-                name: u ? (u.fullName || u.name || u.email) : "Ẩn danh", //
-                totalMoney: 0, //
-                count: 0 //
+                name: u ? (u.fullName || u.name || u.email) : "Ẩn danh",
+                totalMoney: 0,
+                count: 0
             };
         }
 
-        if (parseInt(lead.step) >= 4) { //
-            stats[uid].totalMoney += parseInt(lead.commission || 0); //
-            stats[uid].count++; //
+        if (parseInt(lead.step) === 4) {
+            // Xếp hạng dựa trên tổng Doanh số HĐ mang về cho doanh nghiệp thay vì tiền hoa hồng đơn thuần
+            stats[uid].totalMoney += parseInt(lead.contractValue || lead.totalAmount || 0);
+            stats[uid].count++;
         }
     });
 
-    const topList = Object.values(stats) //
-        .sort((a, b) => b.totalMoney - a.totalMoney) //
-        .slice(0, 5); //
+    const topList = Object.values(stats)
+        .sort((a, b) => b.totalMoney - a.totalMoney)
+        .slice(0, 5);
 
-    let html = ""; //
+    let html = "";
     topList.forEach((ctv, index) => {
-        const badges = ["#FFD700", "#C0C0C0", "#CD7F32"]; //
-        const badgeColor = index < 3 ? badges[index] : "#f1f5f9"; //
-        const textColor = index < 3 ? "#fff" : "#64748b"; //
+        const badges = ["#FFD700", "#C0C0C0", "#CD7F32"];
+        const badgeColor = index < 3 ? badges[index] : "#f1f5f9";
+        const textColor = index < 3 ? "#fff" : "#64748b";
 
         html += `
-            <div class="d-flex align-items-center justify-content-between p-2 rounded-3 border-bottom last-child-border-0">
-                <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center justify-content-between p-2 rounded-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
                     <div class="fw-800 d-flex align-items-center justify-content-center rounded-circle" 
-                         style="width: 32px; height: 32px; background: ${badgeColor}; color: ${textColor}; font-size: 0.8rem;">
+                         style="width: 28px; height: 28px; background: ${badgeColor}; color: ${textColor}; font-size: 0.75rem;">
                         ${index + 1}
                     </div>
                     <div>
-                        <div class="fw-700 text-dark small">${ctv.name}</div>
-                        <div class="text-muted" style="font-size: 0.65rem;">${ctv.count} đơn hàng thành công</div>
+                        <div class="fw-700 text-dark small" style="font-size:0.75rem;">${ctv.name}</div>
+                        <div class="text-muted" style="font-size: 0.6rem;">${ctv.count} đơn hàng chốt đơn</div>
                     </div>
                 </div>
                 <div class="text-end">
-                    <div class="fw-800 text-success small">${ctv.totalMoney.toLocaleString()}đ</div>
+                    <div class="fw-800 text-success small" style="font-size:0.75rem;">${ctv.totalMoney.toLocaleString()}đ</div>
                 </div>
-            </div>`; //
+            </div>`;
     });
 
-    container.innerHTML = html || '<p class="text-center py-4 text-muted small">Chưa có dữ liệu chốt đơn</p>'; //
+    container.innerHTML = html || '<p class="text-center py-4 text-muted small">Chưa có dữ liệu doanh số từ CTV</p>';
 };
 
 // =========================
