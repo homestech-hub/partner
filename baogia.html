@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản Lý Báo Giá Di Động - Homestech</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #059669; --bg-body: #f8fafc; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); color: #1e293b; padding-bottom: 40px; }
+        .m-header { background: #ffffff; padding: 14px 16px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; }
+        .brand-title { font-weight: 800; font-size: 1rem; color: #0f172a; }
+        .input-m { padding: 10px 14px; border-radius: 12px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; font-weight: 600; background-color: #fff; }
+        
+        .m-item-card { background: #ffffff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .product-item-box { background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; padding: 14px; margin-bottom: 12px; position: relative; }
+        .remove-item-btn { position: absolute; top: 10px; right: 10px; color: #ef4444; border: none; background: none; font-size: 1.2rem; z-index: 10; }
+        
+        .suggestion-list { position: absolute; left: 12px; right: 12px; background: white; border: 1px solid #cbd5e1; border-radius: 10px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 0; list-style: none; margin: 2px 0 0 0; display: none; }
+        .suggestion-item { padding: 10px 14px; cursor: pointer; font-size: 0.85rem; font-weight: 600; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .suggestion-item:active { background-color: #ecfdf5; color: var(--primary); }
+
+        .quote-badge { font-size: 0.65rem; padding: 4px 10px; border-radius: 6px; font-weight: 700; }
+        .q-da_gui { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+        .q-da_chot { background: #dcfce7; color: #15803d; }
+        .q-khong_chot { background: #fee2e2; color: #b91c1c; }
+
+        /* KHỔ GIẤY IN A4 ẨN ĐẨY RA KHỎI KHUNG NHÌN MOBILE ĐỂ TRANH CO VỠ KHUNG TRẮNG */
+/* 🌟 SỬA LẠI: KHỔ GIẤY IN A4 ẨN AN TOÀN CHỐNG LỖI TRẮNG TRANG TRÊN MOBILE 🌟 */
+#pdf-template { 
+    background: #ffffff; 
+    padding: 40px; 
+    font-size: 14px; 
+    color: #000; 
+    width: 800px; 
+    box-sizing: border-box;
+    display: none; /* Sử dụng display none thuần túy để trình duyệt mobile chuẩn bị sẵn DOM */
+}        .pdf-header-title { color: #065f46; font-weight: 800; font-size: 24px; text-transform: uppercase; margin-bottom: 5px; }
+        .pdf-table { width: 100% !important; border-collapse: collapse !important; margin-top: 15px; table-layout: fixed; }
+        .pdf-table th { background-color: #f1f5f9 !important; color: #0f172a !important; font-weight: 700; border: 1px solid #cbd5e1 !important; padding: 10px; text-align: center; }
+        .pdf-table td { border: 1px solid #cbd5e1 !important; padding: 10px !important; vertical-align: middle !important; word-wrap: break-word; }
+        .img-preview-thumb { width: 55px; height: 55px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; background-color: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+    <div class="m-header">
+        <button class="btn btn-sm p-0 border-0" id="btnHeaderBack"><i class="bi bi-chevron-left fs-4"></i></button>
+        <div class="brand-title" id="mHeaderTitle">QUẢN LÝ BÁO GIÁ CRM</div>
+        <div style="width:24px;"></div>
+    </div>
+
+    <div class="container-fluid px-3 pt-3">
+        
+        <div id="mQuoteListView">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-800 text-secondary m-0 text-uppercase" style="font-size:0.75rem;">Danh sách dữ liệu từ Firebase</h6>
+                <button class="btn btn-success btn-sm rounded-pill px-3 fw-700" id="btnOpenCreate"><i class="bi bi-plus-lg me-1"></i> TẠO MỚI</button>
+            </div>
+            <input type="text" id="mSearchQuoteInput" class="form-control input-m mb-3" placeholder="Tìm tên khách hàng báo giá...">
+            
+            <div id="mQuoteListContainer">
+                <div class="text-center py-5"><div class="spinner-border text-success spinner-border-sm"></div></div>
+            </div>
+        </div>
+
+        <div id="mQuoteFormView" class="d-none">
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+                <h6 class="fw-800 text-success mb-3"><i class="bi bi-person-fill me-2"></i>Thông tin khách hàng nhận</h6>
+                <input type="hidden" id="submitQuoteId">
+                <div class="mb-2"><input type="text" id="custName" class="form-control input-m" placeholder="Tên khách hàng (Ví dụ: Anh Tuyến)"></div>
+                <div class="mb-2"><input type="tel" id="custPhone" class="form-control input-m" placeholder="Số điện thoại"></div>
+                <div class="mb-0"><input type="text" id="custAddress" class="form-control input-m" placeholder="Địa chỉ / Vị trí công trình"></div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                <h6 class="fw-800 m-0 text-secondary text-uppercase" style="font-size: 0.75rem;">Chi tiết danh mục thiết bị</h6>
+                <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-700" id="btnAddNewProduct"><i class="bi bi-plus-circle-fill me-1"></i> Thêm hàng hóa</button>
+            </div>
+
+            <div id="products-list-container"></div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
+                <h6 class="fw-800 text-dark mb-3"><i class="bi bi-sliders me-2"></i>Cấu hình VAT 8% &amp; Đồng bộ</h6>
+                
+                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center ps-0">
+                    <label class="fw-700 small text-muted m-0" for="switchVAT">Xuất hóa đơn giá trị gia tăng (VAT 8%)</label>
+                    <input class="form-check-input shadow-none" type="checkbox" id="switchVAT" style="width: 45px; height: 24px; cursor: pointer;">
+                </div>
+
+                <div class="bg-light p-3 rounded-3 mb-3 border">
+                    <div class="d-flex justify-content-between mb-1 small fw-600 text-muted"><span>Tổng giá bán thiết bị:</span><span id="lblSubTotal">0đ</span></div>
+                    <div class="d-flex justify-content-between mb-1 small fw-600 text-muted"><span>Tổng giá vốn nhập:</span><span id="lblTotalCost" class="text-secondary">0đ</span></div>
+                    <div class="d-flex justify-content-between mb-2 small fw-600 text-muted border-bottom pb-2"><span>Thuế giá trị gia tăng (VAT 8%):</span><span id="lblVAT">0đ</span></div>
+                    <div class="d-flex justify-content-between align-items-center mb-2"><b class="small text-dark">LỢI NHUẬN DỰ KIẾN:</b><b class="text-primary fw-800" id="lblProfit">0đ (0%)</b></div>
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top"><b class="small text-dark">TỔNG GIÁ TRỊ PHIẾU:</b><b class="text-success fs-5 fw-800" id="lblGrandTotal">0đ</b></div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-light w-50 py-3 rounded-3 fw-700 text-muted" id="btnCancelForm">HỦY QUAY LẠI</button>
+                    <button class="btn btn-success w-50 py-3 rounded-3 fw-800 shadow" id="btnSaveSubmit"><i class="bi bi-cloud-arrow-up-fill me-1"></i>LƯU &amp; XUẤT PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pdf-template">
+        <div class="d-flex justify-content-between align-items-start mb-4" style="width: 100%;">
+            <div>
+                <h3 class="pdf-header-title">HOMESTECH JSC</h3>
+                <p class="m-0 text-muted" style="font-size: 13px; font-weight:600;">Giải pháp Nhà thông minh - Camera - Điện nhẹ</p>
+                <p class="m-0 text-muted" style="font-size: 13px; font-weight:600;">Hotline: 0784 289 289 | Địa chỉ: Đà Lạt, Lâm Đồng</p>
+            </div>
+            <div class="text-end">
+                <h4 class="fw-800 text-success m-0" style="font-size: 20px;">BẢNG BÁO GIÁ GIẢI PHÁP</h4>
+                <p class="text-muted m-0" style="font-size: 12px;">Ngày lập: <span id="pdfDate"></span></p>
+            </div>
+        </div>
+
+        <div class="row mb-4 bg-white p-3 rounded-3 border mx-0" style="font-size: 14px; line-height: 1.6; width: 100%;">
+            <div class="col-6 mb-1"><b>Kính gửi:</b> <span id="pdfCustName"></span></div>
+            <div class="col-6 mb-1 text-end"><b>Số điện thoại:</b> <span id="pdfCustPhone"></span></div>
+            <div class="col-12"><b>Địa điểm thi công:</b> <span id="pdfCustAddress"></span></div>
+        </div>
+
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%">STT</th>
+                    <th style="width: 16%">Hình ảnh</th>
+                    <th style="width: 42%; text-align: left;">Tên thiết bị / Quy cách kỹ thuật</th>
+                    <th style="width: 8%">SL</th>
+                    <th style="width: 12%">Đơn giá</th>
+                    <th style="width: 14%">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody id="pdfTableBody"></tbody>
+        </table>
+
+        <div class="d-flex justify-content-end mt-4" style="width: 100%;">
+            <div style="width: 320px; font-size: 14px; line-height: 1.8;">
+                <div class="d-flex justify-content-between"><span>Tổng tiền thiết bị:</span> <b id="pdfSubTotal">0đ</b></div>
+                <div class="d-flex justify-content-between"><span>Thuế VAT (8%):</span> <b id="pdfVAT">0đ</b></div>
+                <div class="d-flex justify-content-between pt-2 border-top text-success" style="font-size: 16px;"><span><b>TỔNG CỘNG:</b></span> <b id="pdfGrandTotal">0đ</b></div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between mt-5" style="width: 100%; margin-top: 50px !important;">
+            <div class="text-center italic text-muted" style="font-size: 12px; width: 50%;">Trân trọng cảm ơn sự hợp tác của Quý khách!</div>
+            <div class="text-center fw-700" style="width: 50%; font-size: 14px;">ĐẠI DIỆN HOMESTECH JSC</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module" src="./js/baogia.js"></script>
+</body>
+</html>
