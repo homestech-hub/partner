@@ -294,25 +294,46 @@ window.deleteMQuote = function(id) {
 };
 
 // ==========================================
-// 5. HIỂN THỊ CTV TAB
+// 5. HIỂN THỊ CTV TAB (ĐÃ NÂNG CẤP CHỨC NĂNG SỬA & XÓA)
 // ==========================================
 function renderCTVList(users) {
     const container = document.getElementById("m-ctvListContainer");
     if (!container) return;
     let html = "";
+    
     Object.entries(users).forEach(([uid, u]) => {
-        if (u.role === "partner") { //
+        if (u.role === "partner") {
+            const fullName = u.fullName || u.name || "N/A";
+            const email = u.email || "";
+            const phone = u.phone || "";
+            const area = u.area || "Chưa cập nhật";
+            const bankInfo = u.bankInfo || "Chưa cập nhật";
+
             html += `
-                <div class="m-item-card">
-                    <div class="fw-800 text-dark mb-1">${u.fullName || "N/A"}</div>
-                    <div class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i>${u.email || ""}</div>
-                    <div class="small text-muted mb-1"><i class="bi bi-telephone me-1"></i>${u.phone || ""}</div>
-                    <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i>Khu vực: ${u.area || ""}</div>
+                <div class="m-item-card border p-3 mb-2 rounded-4 bg-white shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <b class="text-dark fs-6" style="font-weight: 800;">${fullName}</b>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-3 px-2 py-1" style="font-size:0.65rem;">${area}</span>
+                    </div>
+                    <div class="small text-muted mb-1" style="font-size:0.75rem;"><i class="bi bi-envelope me-1.5"></i>${email}</div>
+                    <div class="small text-muted mb-1" style="font-size:0.75rem;"><i class="bi bi-telephone me-1.5"></i>SĐT: ${phone}</div>
+                    <div class="small text-muted mb-2" style="font-size:0.75rem;"><i class="bi bi-bank me-1.5"></i>${bankInfo}</div>
+                    
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button class="btn btn-sm btn-light border fw-600 rounded-pill px-3" style="font-size: 0.7rem;"
+                            onclick="window.openMEditCTVModal('${uid}', '${fullName.replace(/'/g, "\\'")}', '${email}', '${phone}', '${area.replace(/'/g, "\\'")}', '${bankInfo.replace(/'/g, "\\'")}')">
+                            <i class="bi bi-pencil-square me-1"></i>Sửa
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3" style="font-size: 0.7rem;" 
+                            onclick="window.deleteMUser('${uid}')">
+                            <i class="bi bi-trash3"></i> Xóa
+                        </button>
+                    </div>
                 </div>
             `;
         }
     });
-    container.innerHTML = html || `<div class="text-center text-muted py-5 small">Trống</div>`; //
+    container.innerHTML = html || `<div class="text-center text-muted py-5 small">Chưa có đối tác nào.</div>`;
 }
 
 function renderCTVFilter(users) {
@@ -331,3 +352,83 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("m-filterCTV")?.addEventListener("change", applyMobileFilters);
     document.getElementById("m-searchQuote")?.addEventListener("input", window.renderQuotes);
 });
+
+// --- HÀM MỞ FORM THÊM CTV MỚI ---
+window.openMAddCTVModal = () => {
+    document.getElementById("m-ctvManageForm").reset();
+    document.getElementById("m-manageCTVUid").value = "";
+    document.getElementById("m-ctvEmail").disabled = false;
+    document.getElementById("m-ctvPasswordGroup").classList.remove("d-none");
+    document.getElementById("m-ctvPassword").required = true;
+    document.getElementById("m-ctvModalTitle").innerText = "Thêm cộng tác viên mới";
+    
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("m-ctvFormModal")).show();
+};
+
+// --- HÀM MỞ FORM ĐIỀN SẴN DỮ LIỆU CŨ ĐỂ SỬA CTV ---
+window.openMEditCTVModal = (uid, fullName, email, phone, area, bankInfo) => {
+    document.getElementById("m-manageCTVUid").value = uid;
+    document.getElementById("m-ctvFullName").value = fullName !== "N/A" ? fullName : "";
+    document.getElementById("m-ctvEmail").value = email;
+    document.getElementById("m-ctvEmail").disabled = true; // Email cố định để bảo toàn Auth gốc
+    document.getElementById("m-ctvPasswordGroup").classList.add("d-none"); // Ẩn trường mật khẩu khi sửa thông tin
+    document.getElementById("m-ctvPassword").required = false;
+    document.getElementById("m-ctvPhone").value = phone;
+    document.getElementById("m-ctvArea").value = area !== "Chưa cập nhật" ? area : "";
+    document.getElementById("m-ctvBankInfo").value = bankInfo !== "Chưa cập nhật" ? bankInfo : "";
+    document.getElementById("m-ctvModalTitle").innerText = "Chỉnh sửa thông tin đối tác";
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("m-ctvFormModal")).show();
+};
+
+// --- HÀM GỬI LƯU / CẬP NHẬT DỮ LIỆU ĐỐI TÁC CTV ---
+window.saveMCTVToFirebase = async (event) => {
+    event.preventDefault();
+    
+    const uid = document.getElementById("m-manageCTVUid").value;
+    const fullName = document.getElementById("m-ctvFullName").value.trim();
+    const email = document.getElementById("m-ctvEmail").value.trim();
+    const phone = document.getElementById("m-ctvPhone").value.trim();
+    const area = document.getElementById("m-ctvArea").value.trim();
+    const bankInfo = document.getElementById("m-ctvBankInfo").value.trim();
+
+    const ctvData = {
+        fullName: fullName,
+        phone: phone,
+        area: area,
+        bankInfo: bankInfo,
+        role: "partner",
+        updatedAt: Date.now()
+    };
+
+    try {
+        if (uid) {
+            // Thực hiện update bản ghi cũ
+            await update(ref(db, `COMPANIES/homestech/users/${uid}`), ctvData);
+            alert("Cập nhật thông tin CTV thành công!");
+        } else {
+            // Thực hiện thêm mới vào DB
+            const password = document.getElementById("m-ctvPassword").value;
+            if (password.length < 6) return alert("Mật khẩu khởi tạo phải từ 6 ký tự trở lên!");
+
+            const newCTVRef = push(ref(db, "COMPANIES/homestech/users"));
+            ctvData.email = email;
+            ctvData.createdAt = Date.now();
+            
+            await set(newCTVRef, ctvData);
+            alert("Khởi tạo thông tin dữ liệu CTV mới thành công!");
+        }
+        bootstrap.Modal.getInstance(document.getElementById("m-ctvFormModal")).hide();
+    } catch (e) {
+        alert("Lỗi: " + e.message);
+    }
+};
+
+// --- HÀM XÓA TÀI KHOẢN CTV VĨNH VIỄN ---
+window.deleteMUser = (uid) => {
+    if (confirm("Bạn có chắc chắn muốn xóa vĩnh viễn Cộng tác viên này khỏi hệ thống không?")) {
+        remove(ref(db, `COMPANIES/homestech/users/${uid}`))
+            .then(() => alert("Đã xóa dữ liệu CTV thành công!"))
+            .catch(err => alert("Lỗi xóa: " + err.message));
+    }
+};
