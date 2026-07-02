@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { ref, onValue, update, remove, push, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { ref, onValue, update, remove, set, push, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 window.logout = () => signOut(auth);
 
