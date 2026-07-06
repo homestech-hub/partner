@@ -29,17 +29,17 @@
         .q-da_chot { background: #dcfce7; color: #15803d; }
         .q-khong_chot { background: #fee2e2; color: #b91c1c; }
 
-        /* KHỔ GIẤY IN A4 ẨN ĐẨY RA KHỎI KHUNG NHÌN MOBILE ĐỂ TRANH CO VỠ KHUNG TRẮNG */
-/* 🌟 SỬA LẠI: KHỔ GIẤY IN A4 ẨN AN TOÀN CHỐNG LỖI TRẮNG TRANG TRÊN MOBILE 🌟 */
-#pdf-template { 
-    background: #ffffff; 
-    padding: 40px; 
-    font-size: 14px; 
-    color: #000; 
-    width: 800px; 
-    box-sizing: border-box;
-    display: none; /* Sử dụng display none thuần túy để trình duyệt mobile chuẩn bị sẵn DOM */
-}        .pdf-header-title { color: #065f46; font-weight: 800; font-size: 24px; text-transform: uppercase; margin-bottom: 5px; }
+        /* KHỔ GIẤY IN A4 ẨN AN TOÀN CHỐNG LỖI TRẮNG TRANG TRÊN MOBILE */
+        #pdf-template { 
+            background: #ffffff; 
+            padding: 40px; 
+            font-size: 14px; 
+            color: #000; 
+            width: 800px; 
+            box-sizing: border-box;
+            display: none; 
+        }
+        .pdf-header-title { color: #065f46; font-weight: 800; font-size: 24px; text-transform: uppercase; margin-bottom: 5px; }
         .pdf-table { width: 100% !important; border-collapse: collapse !important; margin-top: 15px; table-layout: fixed; }
         .pdf-table th { background-color: #f1f5f9 !important; color: #0f172a !important; font-weight: 700; border: 1px solid #cbd5e1 !important; padding: 10px; text-align: center; }
         .pdf-table td { border: 1px solid #cbd5e1 !important; padding: 10px !important; vertical-align: middle !important; word-wrap: break-word; }
@@ -108,6 +108,7 @@
         </div>
     </div>
 
+    <!-- KHUÔN IN GIẤY A4 CHUẨN ĐÃ PHÂN TỶ LỆ LẠI CÁC CỘT MỚI -->
     <div id="pdf-template">
         <div class="d-flex justify-content-between align-items-start mb-4" style="width: 100%;">
             <div>
@@ -130,12 +131,13 @@
         <table class="pdf-table">
             <thead>
                 <tr>
-                    <th style="width: 8%">STT</th>
-                    <th style="width: 16%">Hình ảnh</th>
-                    <th style="width: 42%; text-align: left;">Tên thiết bị / Quy cách kỹ thuật</th>
-                    <th style="width: 8%">SL</th>
-                    <th style="width: 12%">Đơn giá</th>
-                    <th style="width: 14%">Thành tiền</th>
+                    <th style="width: 5%">STT</th>
+                    <th style="width: 14%">Hình ảnh</th>
+                    <th style="width: 37%; text-align: left;">Tên thiết bị / Quy cách kỹ thuật</th>
+                    <th style="width: 8%">Đơn vị</th>
+                    <th style="width: 6%">SL</th>
+                    <th style="width: 15%">Đơn giá</th> <!-- 🌟 Đã tăng từ 10% lên 13% -->
+                    <th style="width: 15%">Thành tiền</th> <!-- 🌟 Đã tăng từ 10% lên 15% -->
                 </tr>
             </thead>
             <tbody id="pdfTableBody"></tbody>
@@ -143,9 +145,9 @@
 
         <div class="d-flex justify-content-end mt-4" style="width: 100%;">
             <div style="width: 320px; font-size: 14px; line-height: 1.8;">
-                <div class="d-flex justify-content-between"><span>Tổng tiền thiết bị:</span> <b id="pdfSubTotal">0đ</b></div>
-                <div class="d-flex justify-content-between"><span>Thuế VAT (8%):</span> <b id="pdfVAT">0đ</b></div>
-                <div class="d-flex justify-content-between pt-2 border-top text-success" style="font-size: 16px;"><span><b>TỔNG CỘNG:</b></span> <b id="pdfGrandTotal">0đ</b></div>
+                <div class="d-flex justify-content-between"><span>Tổng tiền thiết bị:</span> <b id="pdfSubTotal">0</b></div>
+                <div class="d-flex justify-content-between"><span>Thuế VAT (8%):</span> <b id="pdfVAT">0</b></div>
+                <div class="d-flex justify-content-between pt-2 border-top text-success" style="font-size: 16px;"><span><b>TỔNG CỘNG:</b></span> <b id="pdfGrandTotal">0</b></div>
             </div>
         </div>
         <div class="d-flex justify-content-between mt-5" style="width: 100%; margin-top: 50px !important;">
