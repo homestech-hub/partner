@@ -5,7 +5,7 @@ import { ref, onValue, push, update, remove, get } from "https://www.gstatic.com
 let productCount = 0;
 let localQuotesCache = [];
 
-// ĐỒNG BỘ AUTHENTICATION THEO ĐÚNG TIÊU CHUẨN RULES
+// ĐỒNG BỘ AUTHENTICATION
 onAuthStateChanged(auth, (user) => {
     if (!user) {
         location.href = "adminlogin.html";
@@ -27,7 +27,6 @@ function initBaoGiaSystem() {
         }
     });
 
-    // Ràng buộc sự kiện click động cho các phần tử DOM
     document.getElementById("btnHeaderBack").onclick = () => window.location.href = 'mobiledash.html';
     document.getElementById("btnOpenCreate").onclick = () => openCreateForm();
     document.getElementById("btnAddNewProduct").onclick = () => addNewProductItem();
@@ -41,7 +40,6 @@ function getSavedProducts() {
     return JSON.parse(localStorage.getItem("HOMESTECH_SAVED_PRODUCTS")) || {};
 }
 
-// RENDER DANH SÁCH BÊN NGOÀI MOBILE KÈM DANH MỤC THIẾT BỊ HIỂN THỊ TRỰC QUAN
 function renderMobileQuotesList() {
     const container = document.getElementById("mQuoteListContainer");
     if (!container) return;
@@ -342,7 +340,6 @@ function deleteMobileQuote(id) {
     }
 }
 
-// 🌟 FIX LỖI XUẤT TRANG TRẮNG: THÊM SETTIMEOUT CHỜ BROWSER PAINT DOM XONG MỚI CHỤP 🌟
 async function saveQuoteToFirebaseAndDownloadPDF() {
     const custName = document.getElementById("custName").value.trim();
     if (!custName) return alert("Vui lòng gõ tên khách hàng!");
@@ -409,7 +406,6 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
             await push(ref(db, "COMPANIES/homestech/quotes"), quoteNodeData);
         }
 
-        // ĐỔ DỮ LIỆU VÀO KHUÔN GIẤY TRƯỚC
         document.getElementById("pdfCustName").innerText = custName;
         document.getElementById("pdfCustPhone").innerText = quoteNodeData.pdfCustPhone;
         document.getElementById("pdfCustAddress").innerText = quoteNodeData.pdfCustAddress;
@@ -417,7 +413,10 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
 
         let tableBodyHtml = "";
         itemsArray.forEach((item, index) => {
-            const imgTag = item.imgLink ? `<img src="${item.imgLink}" style="width:50px; height:55px; object-fit:cover; border-radius:4px;">` : `<span class="text-muted small" style="font-size:11px;">Không ảnh</span>`;
+            // 🌟 GIẢI PHÁP ĐỘT PHÁ SIÊU NHẸ: Bọc link ảnh qua Proxy CORS mở 'https://images.weserv.nl/?url='
+            // Nó giúp bẻ gãy mọi rào cản bảo mật của điện thoại mà ko tốn 1 byte Base64 nào trong DB!
+            const proxyImgUrl = item.imgLink ? `https://images.weserv.nl/?url=${encodeURIComponent(item.imgLink)}&w=200&h=200&fit=cover` : '';
+            const imgTag = item.imgLink ? `<img src="${proxyImgUrl}" crossorigin="anonymous" style="width:55px; height:55px; object-fit:cover; border-radius:6px; display:inline-block;">` : `<span class="text-muted small" style="font-size:11px;">Không ảnh</span>`;
             
             let formattedDescription = `<b style="font-size:14px; color:#0f172a; display:block; margin-bottom:4px;">${item.name}</b>`;
             if (item.details) {
@@ -435,7 +434,7 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
             tableBodyHtml += `
                 <tr>
                     <td style="text-align:center;">${index + 1}</td>
-                    <td style="text-align:center;">${imgTag}</td>
+                    <td style="text-align:center; padding: 4px;">${imgTag}</td>
                     <td style="text-align:left; vertical-align:top;">${formattedDescription}</td>
                     <td style="text-align:center;">${item.qty}</td>
                     <td style="text-align:right;">${item.price.toLocaleString('vi-VN')}đ</td>
@@ -448,12 +447,24 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
         document.getElementById("pdfVAT").innerText = vatTotal.toLocaleString('vi-VN') + "đ";
         document.getElementById("pdfGrandTotal").innerText = grandTotal.toLocaleString('vi-VN') + "đ";
 
-        // 🌟 BƯỚC FIX LỖI: Bật hiển thị dạng block và đưa tọa độ tạm thời về vùng an toàn cho Mobile Paint DOM
         const element = document.getElementById("pdf-template");
         element.style.display = "block";
-        element.style.position = "static"; // Đưa về dòng chảy bình thường để canvas tính toán kích thước thực
+        element.style.position = "static"; 
         
-        // Trì hoãn 400ms cố định để đảm bảo thiết bị di động đã nạp xong text/ảnh vào bảng
+        const allPdfImages = element.querySelectorAll("img");
+        const imageLoadPromises = [];
+
+        allPdfImages.forEach((img) => {
+            if (!img.complete) {
+                imageLoadPromises.push(new Promise((resolve) => {
+                    img.onload = () => resolve();
+                    img.onerror = () => resolve(); 
+                }));
+            }
+        });
+
+        await Promise.all(imageLoadPromises);
+
         setTimeout(async () => {
             try {
                 const opt = {
@@ -462,7 +473,8 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { 
                         scale: 2, 
-                        useCORS: true, 
+                        useCORS: true,      
+                        allowTaint: false,  
                         logging: false, 
                         width: 800,
                         scrollY: 0,
@@ -471,21 +483,19 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // Tiến hành chụp ảnh và tải xuống
                 await html2pdf().set(opt).from(element).save();
                 
-                // Ẩn lại khuôn in sau khi xuất file thành công để không vỡ UI Mobile
                 element.style.display = "none";
                 element.style.position = "absolute";
                 
-                alert("Đã lưu đồng bộ lên Firebase và tải file PDF thành công!");
+                alert("Đã lưu đồng bộ lên Firebase và tải file PDF kèm hình ảnh thành công!");
                 closeFormView();
             } catch (pdfErr) {
                 element.style.display = "none";
                 element.style.position = "absolute";
                 alert("Lỗi tạo PDF: " + pdfErr.message);
             }
-        }, 400);
+        }, 600); // Tăng nhẹ thời gian chờ render đồ họa lên 600ms giúp proxy tải mượt mà hơn trên 4G di động
 
     } catch (err) {
         alert("Lỗi kết nối Firebase: " + err.message);
