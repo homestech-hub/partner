@@ -3,6 +3,45 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { ref, push, onValue, query, orderByChild, equalTo, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 window.logout = () => signOut(auth);
 
+// 🌟 CẤU HÌNH THÔNG TIN BOT TELEGRAM CỦA HOMESTECH ĐÃ THỬ NGHIỆM CHUẨN XÁC
+const TELEGRAM_TOKEN = "8580596129:AAHBQoGScTBxM5cARdBbWIUQ31f-TGkuPxM";
+const TELEGRAM_CHAT_ID = "-5411841682"; // Sử dụng ID nhóm thường chuẩn xác rút gọn từ Logs hệ thống
+
+/**
+ * Hàm tự động gửi thông báo Realtime qua Telegram
+ */
+async function sendTelegramNotification(leadData, ctvName = "Đối tác CTV") {
+    const message = `
+🔔 *CÓ KHÁCH HÀNG MỚI TỪ CTV!*
+────────────────
+👤 *Khách hàng:* ${leadData.name || "Chưa rõ tên"}
+📞 *Số điện thoại:* ${leadData.phone || "Chưa có"}
+📍 *Dự án/Nhu cầu:* ${leadData.project || "Chưa có"}
+🏠 *Địa chỉ/Công trình:* ${leadData.address || "Chưa có"}
+📝 *Nội dung ghi chú:* ${leadData.note || "Không có"}
+
+🤝 *Người giới thiệu:* ${ctvName}
+📅 *Thời gian:* ${new Date().toLocaleString('vi-VN')}
+────────────────
+🚀 _Vui lòng truy cập hệ thống Homestech CRM để xử lý tiến độ!_
+    `.trim();
+
+    try {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: message,
+                parse_mode: "Markdown"
+            })
+        });
+        console.log("Đã gửi thông báo đến nhóm Telegram công ty thành công!");
+    } catch (error) {
+        console.error("Lỗi kết nối API Telegram:", error);
+    }
+}
+
 // --- 1. LOGIC ĐỊNH VỊ GPS ---
 window.getCurrentLocation = () => {
     const addrInput = document.getElementById("cAddress");
@@ -34,8 +73,7 @@ window.handleImageStep = (step) => {
     reader.readAsDataURL(file);
 };
 
-// --- 3. GỬI DỮ LIỆU LÊN FIREBASE ---
-// --- 3. GỬI DỮ LIỆU LÊN FIREBASE (ĐÃ CHUYỂN SANG DẠNG LINK ẢNH) ---
+// --- 3. GỬI DỮ LIỆU LÊN FIREBASE & KÍCH HOẠT TELEGRAM NOTIFICATION ---
 const leadForm = document.getElementById("addLeadForm");
 if (leadForm) {
     leadForm.onsubmit = async (e) => {
@@ -69,7 +107,15 @@ if (leadForm) {
         };
 
         try {
+            // 1. Gửi đồng bộ lên Firebase Realtime Database
             await push(ref(db, "COMPANIES/homestech/leads"), leadData);
+            
+            // 2. Lấy tên CTV đang hiển thị từ giao diện Profile thực tế
+            const currentCTVName = document.getElementById("profileName")?.innerText || "Cộng tác viên";
+            
+            // 3. Gọi hàm tự động gửi thông báo đến nhóm Telegram
+            await sendTelegramNotification(leadData, currentCTVName);
+
             alert("Gửi yêu cầu hợp tác thành công!");
             location.reload();
         } catch (error) {
@@ -81,8 +127,6 @@ if (leadForm) {
 }
 
 // --- 4. LOAD DANH SÁCH KHÁCH HÀNG ---
-// --- 4. LOAD DANH SÁCH KHÁCH HÀNG (CẬP NHẬT TRẠNG THÁI & LÀM MỜ) ---
-// --- 4. LOAD DANH SÁCH KHÁCH HÀNG (CẬP NHẬT MINH BẠCH GIÁ TRỊ BÁO GIÁ) ---
 function loadData(uid) {
     const listContainer = document.getElementById("customerStatusList");
     if (listContainer) listContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div></div>';
@@ -103,12 +147,10 @@ function loadData(uid) {
         const rawLeadsForReport = [];
 
         items.forEach(([key, item]) => {
-            // Chuyển chữ về viết thường để so sánh đa năng
             const nameMatch = (item.name || "").toLowerCase().includes(searchKeyword);
             const phoneMatch = (item.phone || "").includes(searchKeyword);
             const projectMatch = (item.project || "").toLowerCase().includes(searchKeyword);
 
-            // Nếu có từ khóa tìm kiếm mà không khớp bất cứ trường nào thì bỏ qua
             if (searchKeyword && !nameMatch && !phoneMatch && !projectMatch) return;
 
             stats.total++;
@@ -134,17 +176,15 @@ function loadData(uid) {
             const mapLink = `http://maps.google.com/?q=${encodeURIComponent(validAddress)}`;
             const archiveClass = (step >= 4) ? "lead-archived" : "";
 
-            // Tính toán an toàn giá trị hợp đồng/báo giá được đồng bộ từ Admin
-const contractValue = parseInt(item.contractValue || item.totalAmount || 0);
+            const contractValue = parseInt(item.contractValue || item.totalAmount || 0);
 
-// Tính toán tỷ lệ phần trăm hoa hồng thực tế để hiển thị minh bạch
-let commPercentText = "";
-if (contractValue > 0 && commission > 0) {
-    const percent = (commission / contractValue) * 100;
-    commPercentText = ` (${percent.toFixed(1)}%)`;
-}
+            let commPercentText = "";
+            if (contractValue > 0 && commission > 0) {
+                const percent = (commission / contractValue) * 100;
+                commPercentText = ` (${percent.toFixed(1)}%)`;
+            }
 
-leadHtml += `
+            leadHtml += `
     <div class="item-card shadow-sm ${archiveClass}">
         <div class="d-flex justify-content-between align-items-start mb-2">
             <div>
@@ -203,33 +243,29 @@ leadHtml += `
         calculateCTVReports(rawLeadsForReport);
     });
 }
-// Ràng buộc sự kiện gõ phím tìm kiếm thời gian thực
+
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchCTVLeads");
     if (searchInput) {
         searchInput.addEventListener("input", () => {
             const user = auth.currentUser;
-            if (user) loadData(user.uid); // Gọi lại hàm load dữ liệu kèm bộ lọc
+            if (user) loadData(user.uid);
         });
     }
 });
+
 // --- 5. LOAD LỊCH SỬ THƯỞNG (TẤT TOÁN) ---
-// --- 5. LOAD LỊCH SỬ THƯỞNG (QUÉT TỪ PAYMENTS TRONG LEADS) ---
 function loadPayoutHistory(uid) {
     const container = document.getElementById("payoutHistoryContainer");
     if (!container) return;
 
-    // Hiển thị trạng thái đang tải
     container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success spinner-border-sm"></div></div>';
-
-    // Tìm tất cả khách hàng của CTV này
     const q = query(ref(db, "COMPANIES/homestech/leads"), orderByChild("sourceCTV"), equalTo(uid));
 
     onValue(q, (snap) => {
         const data = snap.val() || {};
         const allPayments = [];
 
-        // Gom tất cả các đợt chi trả từ bên trong các Lead
         Object.entries(data).forEach(([leadId, lead]) => {
             if (lead.payments) {
                 Object.entries(lead.payments).forEach(([pId, p]) => {
@@ -247,7 +283,6 @@ function loadPayoutHistory(uid) {
             return;
         }
 
-        // Sắp xếp mới nhất lên đầu
         allPayments.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
         let html = "";
@@ -283,27 +318,21 @@ window.deleteLead = (key) => {
 };
 
 window.openEditLead = (key, name, phone, project, note) => {
-    // Tìm các phần tử HTML theo ID đã tạo ở Bước 1
     const elKey = document.getElementById("editKey");
     const elName = document.getElementById("editName");
     const elPhone = document.getElementById("editPhone");
     const elProject = document.getElementById("editProject");
     const elNote = document.getElementById("editNote");
-
-    // Kiểm tra xem Modal có tồn tại trong HTML không
     const modalEl = document.getElementById('editLeadModal');
 
     if (modalEl && elKey && elName) {
-        // Gán giá trị vào các ô input
         elKey.value = key;
         elName.value = name || "";
         elPhone.value = phone || "";
         elProject.value = project || "Khác";
         elNote.value = (note === "undefined" || !note) ? "" : note;
 
-        // Mở Modal (Sử dụng API của Bootstrap 5)
-        const editModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        editModal.show();
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
     } else {
         console.error("Lỗi: Thiếu Modal hoặc ID trong file HTML.");
         alert("Hệ thống đang cập nhật giao diện, vui lòng thử lại sau!");
@@ -336,7 +365,7 @@ window.viewLeadDetail = (id) => {
     onValue(ref(db, `COMPANIES/homestech/leads/${id}`), (snap) => {
         const l = snap.val();
         if(!l) return;
-        const imgs = l.images ? l.images.map(img => `<img src="${img}" class="rounded-3 w-100 mb-2 border shadow-sm">`).join('') : '<p class="small opacity-50">Không có ảnh</p>';
+        const imgs = l.imageLink ? `<img src="https://images.weserv.nl/?url=${encodeURIComponent(l.imageLink)}&w=400&fit=cover" crossorigin="anonymous" class="rounded-3 w-100 mb-2 border shadow-sm">` : '<p class="small opacity-50">Không có ảnh</p>';
         const fullDate = new Date(l.createdAt).toLocaleString('vi-VN');
 
         document.getElementById("leadDetailBody").innerHTML = `
@@ -360,15 +389,15 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         const userRef = ref(db, `COMPANIES/homestech/users/${user.uid}`);
         
-        // Cập nhật lastLogin và đồng thời lấy Profile
         onValue(userRef, (snap) => {
             const u = snap.val();
             if (u) {
                 if(document.getElementById("profileName")) document.getElementById("profileName").innerText = u.fullName || u.name || "N/A";
                 if(document.getElementById("profileEmail")) document.getElementById("profileEmail").innerText = u.email || "N/A";
-                if(document.getElementById("profilePhone")) document.getElementById("profilePhone").innerText = u.phone || "N/A";
-                if(document.getElementById("profileArea")) document.getElementById("profileArea").innerText = u.area || "N/A";
-                if(document.getElementById("profileBank")) document.getElementById("profileBank").innerText = u.bankInfo || "Chưa cập nhật";
+                
+                if(document.getElementById("displayProfilePhone")) document.getElementById("displayProfilePhone").innerText = u.phone || "Chưa có";
+                if(document.getElementById("displayProfileArea")) document.getElementById("displayProfileArea").innerText = u.area || "Chưa có";
+                if(document.getElementById("displayProfileBank")) document.getElementById("displayProfileBank").innerText = u.bankInfo || "Chưa có";
             }
         });
 
@@ -381,56 +410,50 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Thay thế đoạn xử lý chuyển Tab cũ bằng đoạn này
 // --- XỬ LÝ CHUYỂN TAB AN TOÀN ---
 document.querySelectorAll('.nav-item-binh').forEach(item => {
     item.onclick = function(e) {
-        if (this.tagName.toLowerCase() === 'a') return; //[cite: 4]
+        if (this.tagName.toLowerCase() === 'a') return; 
         
         e.preventDefault();
+        const targetSelector = this.getAttribute('data-bs-target'); 
+        if (!targetSelector) return; 
 
-        const targetSelector = this.getAttribute('data-bs-target'); //[cite: 4]
-        if (!targetSelector) return; //[cite: 4]
-
-        document.querySelectorAll('.nav-item-binh').forEach(nav => nav.classList.remove('active')); //[cite: 4]
-        this.classList.add('active'); //[cite: 4]
+        document.querySelectorAll('.nav-item-binh').forEach(nav => nav.classList.remove('active')); 
+        this.classList.add('active'); 
 
         document.querySelectorAll('.tab-pane').forEach(pane => {
-            pane.classList.remove('show', 'active'); //[cite: 4]
+            pane.classList.remove('show', 'active'); 
         });
 
-        const targetPane = document.querySelector(targetSelector); //[cite: 4]
+        const targetPane = document.querySelector(targetSelector); 
         if (targetPane) {
-            targetPane.classList.add('show', 'active'); //[cite: 4]
+            targetPane.classList.add('show', 'active'); 
         }
 
-        // TỰ ĐỘNG NẠP LẠI DỮ LIỆU AN TOÀN
         const user = auth.currentUser;
         if (user) {
             const targetId = targetSelector.replace('#', '');
             
             if (targetId === "tab-done") {
-                loadPayoutHistory(user.uid); //[cite: 4]
+                loadPayoutHistory(user.uid); 
             } 
             else if (targetId === "tab-leads") {
-                // 🌟 FIX LỖI TRẮNG TRANG: Đảm bảo ô tìm kiếm được reset hoặc nhận diện đúng chuỗi rỗng
                 const searchInput = document.getElementById("searchCTVLeads");
                 if (searchInput) {
-                    searchInput.value = ""; // Xóa bộ lọc cũ để tránh bị nghẽn danh sách khi đổi tab
+                    searchInput.value = ""; 
                 }
-                loadData(user.uid); // Gọi nạp lại danh sách khách hàng[cite: 4]
+                loadData(user.uid); 
             } 
             else if (targetId === "tab-ctv-reports") {
-                loadData(user.uid); // Nạp dữ liệu mới nhất để chạy báo cáo
+                loadData(user.uid); 
             }
         }
     };
 });
-// --- 8. LOGIC CHỈNH SỬA HỒ SƠ ---
 
-// Hàm mở Modal và điền dữ liệu hiện tại vào Form
-window.openEditProfileModal = () => {
-    // Lấy dữ liệu từ các thẻ đang hiển thị để đưa vào ô input
+// --- 8. LOGIC CHỈNH SỬA HỒ SƠ ---
+window.openMEditProfileModal = () => {
     document.getElementById("editProfilePhone").value = document.getElementById("displayProfilePhone").innerText;
     document.getElementById("editProfileArea").value = document.getElementById("displayProfileArea").innerText;
     document.getElementById("editProfileBank").value = document.getElementById("displayProfileBank").innerText;
@@ -438,7 +461,6 @@ window.openEditProfileModal = () => {
     new bootstrap.Modal(document.getElementById('editProfileModal')).show();
 };
 
-// Xử lý lưu thông tin từ Modal
 const profileForm = document.getElementById("updateProfileForm");
 if (profileForm) {
     profileForm.onsubmit = async (e) => {
@@ -459,7 +481,6 @@ if (profileForm) {
 
         try {
             await update(ref(db, `COMPANIES/homestech/users/${user.uid}`), updates);
-            // Đóng modal sau khi thành công
             bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide();
             alert("Đã cập nhật hồ sơ cá nhân!");
         } catch (error) {
@@ -471,46 +492,18 @@ if (profileForm) {
     };
 }
 
-// Cập nhật lại phần hiển thị trong onAuthStateChanged
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const userRef = ref(db, `COMPANIES/homestech/users/${user.uid}`);
-        onValue(userRef, (snap) => {
-            const u = snap.val();
-            if (u) {
-                if(document.getElementById("profileName")) document.getElementById("profileName").innerText = u.fullName || u.name || "N/A";
-                if(document.getElementById("profileEmail")) document.getElementById("profileEmail").innerText = u.email || "N/A";
-                
-                // Hiển thị ra màn hình Profile
-                if(document.getElementById("displayProfilePhone")) document.getElementById("displayProfilePhone").innerText = u.phone || "Chưa có";
-                if(document.getElementById("displayProfileArea")) document.getElementById("displayProfileArea").innerText = u.area || "Chưa có";
-                if(document.getElementById("displayProfileBank")) document.getElementById("displayProfileBank").innerText = u.bankInfo || "Chưa có";
-            }
-        });
-        loadData(user.uid);
-        loadPayoutHistory(user.uid);
-    } else {
-        location.href = "login.html";
-    }
-});
-
 // --- LOGIC THÔNG BÁO ---
 window.showNotifications = () => {
-    // Sau này bạn có thể mở một Modal danh sách thông báo tại đây
     alert("Tính năng thông báo từ Quản trị đang được cập nhật!");
-    
-    // Tạm thời ẩn chấm đỏ sau khi người dùng nhấn vào xem
     const badge = document.getElementById('notifBadge');
     if (badge) badge.style.display = 'none';
 };
 
-// Hàm mô phỏng việc nhận thông báo mới từ Firebase
 function triggerNotification() {
     const badge = document.getElementById('notifBadge');
     if (badge) badge.style.display = 'block';
 }
 
-//
 // --- 9. HÀM TÍNH TOÁN BÁO CÁO THU NHẬP ĐA GIAI ĐOẠN ---
 function calculateCTVReports(successLeads) {
     const now = new Date();
@@ -522,7 +515,6 @@ function calculateCTVReports(successLeads) {
     let qTotal = 0;
     let yTotal = 0;
 
-    // Khởi tạo mảng gom nhóm chi tiết theo từng tháng của năm nay
     const monthlyBreakdown = Array(13).fill(0); 
 
     successLeads.forEach(l => {
@@ -532,22 +524,19 @@ function calculateCTVReports(successLeads) {
         const lQuarter = Math.floor((d.getMonth() + 3) / 3);
         const comm = parseInt(l.commission || 0);
 
-        // Chỉ tính dữ liệu trong năm nay
         if (lYear === currentYear) {
             yTotal += comm;
-            monthlyBreakdown[lMonth] += comm; // Gom tiền vào tháng tương ứng
+            monthlyBreakdown[lMonth] += comm; 
 
             if (lQuarter === currentQuarter) qTotal += comm;
             if (lMonth === currentMonth) mTotal += comm;
         }
     });
 
-    // Cập nhật 3 ô tổng quan
     if(document.getElementById("repMonth")) document.getElementById("repMonth").innerText = mTotal.toLocaleString('vi-VN') + "đ";
     if(document.getElementById("repQuarter")) document.getElementById("repQuarter").innerText = qTotal.toLocaleString('vi-VN') + "đ";
     if(document.getElementById("repYear")) document.getElementById("repYear").innerText = yTotal.toLocaleString('vi-VN') + "đ";
 
-    // Tạo danh sách timeline chi tiết
     let timelineHtml = "";
     for (let m = 12; m >= 1; m--) {
         if (monthlyBreakdown[m] > 0 || m <= currentMonth) {
