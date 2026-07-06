@@ -40,6 +40,7 @@ function getSavedProducts() {
     return JSON.parse(localStorage.getItem("HOMESTECH_SAVED_PRODUCTS")) || {};
 }
 
+// RENDER DANH SÁCH BÊN NGOÀI MOBILE KÈM DANH MỤC THIẾT BỊ HIỂN THỊ TRỰC QUAN
 function renderMobileQuotesList() {
     const container = document.getElementById("mQuoteListContainer");
     if (!container) return;
@@ -59,7 +60,7 @@ function renderMobileQuotesList() {
 
         let productsSummaryText = "";
         if (q.items && q.items.length > 0) {
-            productsSummaryText = q.items.map(item => `• <b>${item.name}</b> x${item.qty}`).join("<br>");
+            productsSummaryText = q.items.map(item => `• <b>${item.name}</b> x${item.qty} ${item.unit ? item.unit : 'Cái'}`).join("<br>");
         } else {
             productsSummaryText = `<span class="text-muted italic">Không có chi tiết vật tư</span>`;
         }
@@ -141,6 +142,17 @@ function addNewProductItem() {
                     <label class="small fw-700 text-muted mb-1"><i class="bi bi-list-stars text-primary me-1"></i>Thông số kỹ thuật / Tính năng chi tiết</label>
                     <textarea class="form-control input-m pDetails" id="pDetails-${productCount}" rows="3" placeholder="Gõ các tính năng chi tiết, xuống dòng để gạch đầu dòng..."></textarea>
                 </div>
+                
+                <!-- 🌟 BỔ SUNG CỘT ĐƠN VỊ VÀ GHI CHÚ TRÊN GIAO DIỆN -->
+                <div class="col-6 mb-1">
+                    <label class="small fw-700 text-muted mb-1">Đơn vị</label>
+                    <input type="text" class="form-control input-m pUnit" id="pUnit-${productCount}" value="Cái" placeholder="Bộ, Cái, Mét...">
+                </div>
+                <div class="col-6 mb-1">
+                    <label class="small fw-700 text-muted mb-1">Ghi chú sản phẩm</label>
+                    <input type="text" class="form-control input-m pItemNote" id="pItemNote-${productCount}" placeholder="Bảo hành, quà tặng...">
+                </div>
+
                 <div class="col-4"><label class="small fw-700 text-muted mb-1">Số lượng</label><input type="number" class="form-control input-m pQty" value="1"></div>
                 <div class="col-4"><label class="small fw-700 text-muted mb-1">Giá bán lẻ (đ)</label><input type="number" class="form-control input-m pPrice"></div>
                 <div class="col-4"><label class="small fw-700 text-muted mb-1">Giá vốn gốc (đ)</label><input type="number" class="form-control input-m pCost"></div>
@@ -193,7 +205,7 @@ function handleProductSearch(input, id) {
     Object.keys(savedProducts).forEach(name => {
         if (name.toLowerCase().includes(keyword)) {
             const item = savedProducts[name];
-            html += `<li class="suggestion-item" data-name="${name}" data-price="${item.price}" data-cost="${item.cost}" data-link="${item.imgLink}" data-details="${item.details || ''}">
+            html += `<li class="suggestion-item" data-name="${name}" data-price="${item.price}" data-cost="${item.cost}" data-link="${item.imgLink}" data-details="${item.details || ''}" data-unit="${item.unit || 'Cái'}">
                 <span class="fw-700 text-dark">${name}</span>
                 <span class="text-muted small">${item.price.toLocaleString()}đ</span>
             </li>`;
@@ -212,7 +224,8 @@ function handleProductSearch(input, id) {
                     parseFloat(this.getAttribute('data-price')), 
                     parseFloat(this.getAttribute('data-cost')), 
                     this.getAttribute('data-link'),
-                    this.getAttribute('data-details')
+                    this.getAttribute('data-details'),
+                    this.getAttribute('data-unit')
                 );
             };
         });
@@ -221,13 +234,14 @@ function handleProductSearch(input, id) {
     }
 }
 
-function selectProductSuggestion(id, name, price, cost, imgLink, details) {
+function selectProductSuggestion(id, name, price, cost, imgLink, details, unit) {
     const box = document.getElementById(`prod-item-${id}`);
     box.querySelector(".pName").value = name;
     box.querySelector(".pPrice").value = price;
     box.querySelector(".pCost").value = cost || 0;
     box.querySelector(".pImageLink").value = imgLink || "";
     box.querySelector(".pDetails").value = details || "";
+    box.querySelector(".pUnit").value = unit || "Cái";
     
     document.getElementById(`suggest-${id}`).style.display = 'none';
     previewMImageLink(box.querySelector(".pImageLink"), id);
@@ -303,6 +317,14 @@ function openEditQuoteForm(id) {
                                 <label class="small fw-700 text-muted mb-1">Thông số kỹ thuật / Tính năng chi tiết</label>
                                 <textarea class="form-control input-m pDetails" rows="3">${item.details || ''}</textarea>
                             </div>
+                            <div class="col-6 mb-1">
+                                <label class="small fw-700 text-muted mb-1">Đơn vị</label>
+                                <input type="text" class="form-control input-m pUnit" value="${item.unit || 'Cái'}">
+                            </div>
+                            <div class="col-6 mb-1">
+                                <label class="small fw-700 text-muted mb-1">Ghi chú sản phẩm</label>
+                                <input type="text" class="form-control input-m pItemNote" value="${item.itemNote || ''}">
+                            </div>
                             <div class="col-4"><label class="small fw-700 text-muted mb-1">Số lượng</label><input type="number" class="form-control input-m pQty" value="${item.qty}"></div>
                             <div class="col-4"><label class="small fw-700 text-muted mb-1">Giá bán lẻ (đ)</label><input type="number" class="form-control input-m pPrice" value="${item.price}"></div>
                             <div class="col-4"><label class="small fw-700 text-muted mb-1">Giá vốn gốc (đ)</label><input type="number" class="form-control input-m pCost" value="${item.cost || 0}"></div>
@@ -356,18 +378,20 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
     boxes.forEach(box => {
         const name = box.querySelector(".pName").value.trim();
         const details = box.querySelector(".pDetails").value.trim();
+        const unit = box.querySelector(".pUnit") ? box.querySelector(".pUnit").value.trim() : "Cái";
+        const itemNote = box.querySelector(".pItemNote") ? box.querySelector(".pItemNote").value.trim() : "";
         const qty = parseFloat(box.querySelector(".pQty").value) || 0;
         const price = parseFloat(box.querySelector(".pPrice").value) || 0;
         const cost = parseFloat(box.querySelector(".pCost").value) || 0;
         const imgLink = box.querySelector(".pImageLink").value.trim();
 
         if (name) {
-            itemsArray.push({ name, details, qty, price, cost, imgLink });
+            itemsArray.push({ name, details, unit, itemNote, qty, price, cost, imgLink });
             subTotal += (qty * price);
             totalCost += (qty * cost);
 
             if(price > 0) {
-                savedProducts[name] = { price: price, cost: cost, imgLink: imgLink, details: details, savedAt: Date.now() };
+                savedProducts[name] = { price: price, cost: cost, imgLink: imgLink, details: details, unit: unit, savedAt: Date.now() };
             }
         }
     });
@@ -413,8 +437,6 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
 
         let tableBodyHtml = "";
         itemsArray.forEach((item, index) => {
-            // 🌟 GIẢI PHÁP ĐỘT PHÁ SIÊU NHẸ: Bọc link ảnh qua Proxy CORS mở 'https://images.weserv.nl/?url='
-            // Nó giúp bẻ gãy mọi rào cản bảo mật của điện thoại mà ko tốn 1 byte Base64 nào trong DB!
             const proxyImgUrl = item.imgLink ? `https://images.weserv.nl/?url=${encodeURIComponent(item.imgLink)}&w=200&h=200&fit=cover` : '';
             const imgTag = item.imgLink ? `<img src="${proxyImgUrl}" crossorigin="anonymous" style="width:55px; height:55px; object-fit:cover; border-radius:6px; display:inline-block;">` : `<span class="text-muted small" style="font-size:11px;">Không ảnh</span>`;
             
@@ -431,21 +453,27 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
                 formattedDescription += `</div>`;
             }
 
+            // 🌟 HIỂN THỊ GHI CHÚ NHỎ Ở CUỐI PHẦN MÔ TẢ TRONG PDF (NẾU CÓ)
+            if (item.itemNote) {
+                formattedDescription += `<div class="mt-1 text-success italic" style="font-size:11px; font-weight:600;"><i class="bi bi-info-circle me-1"></i>Ghi chú: ${item.itemNote}</div>`;
+            }
+
             tableBodyHtml += `
                 <tr>
                     <td style="text-align:center;">${index + 1}</td>
                     <td style="text-align:center; padding: 4px;">${imgTag}</td>
                     <td style="text-align:left; vertical-align:top;">${formattedDescription}</td>
+                    <td style="text-align:center; font-weight:600;">${item.unit ? item.unit : 'Cái'}</td>
                     <td style="text-align:center;">${item.qty}</td>
-                    <td style="text-align:right;">${item.price.toLocaleString('vi-VN')}đ</td>
-                    <td style="text-align:right; font-weight:800; color:#065f46;">${(item.qty * item.price).toLocaleString('vi-VN')}đ</td>
+                    <td style="text-align:right;">${item.price.toLocaleString('vi-VN')}</td>
+                    <td style="text-align:right; font-weight:800; color:#065f46;">${(item.qty * item.price).toLocaleString('vi-VN')}</td>
                 </tr>`;
         });
         
         document.getElementById("pdfTableBody").innerHTML = tableBodyHtml;
-        document.getElementById("pdfSubTotal").innerText = subTotal.toLocaleString('vi-VN') + "đ";
-        document.getElementById("pdfVAT").innerText = vatTotal.toLocaleString('vi-VN') + "đ";
-        document.getElementById("pdfGrandTotal").innerText = grandTotal.toLocaleString('vi-VN') + "đ";
+        document.getElementById("pdfSubTotal").innerText = subTotal.toLocaleString('vi-VN');
+        document.getElementById("pdfVAT").innerText = vatTotal.toLocaleString('vi-VN');
+        document.getElementById("pdfGrandTotal").innerText = grandTotal.toLocaleString('vi-VN');
 
         const element = document.getElementById("pdf-template");
         element.style.display = "block";
@@ -495,7 +523,7 @@ async function saveQuoteToFirebaseAndDownloadPDF() {
                 element.style.position = "absolute";
                 alert("Lỗi tạo PDF: " + pdfErr.message);
             }
-        }, 600); // Tăng nhẹ thời gian chờ render đồ họa lên 600ms giúp proxy tải mượt mà hơn trên 4G di động
+        }, 600);
 
     } catch (err) {
         alert("Lỗi kết nối Firebase: " + err.message);
